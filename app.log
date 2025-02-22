@@ -1,0 +1,269 @@
+Received data: {'length': '8000', 'width': '4000', 'depth': '1650', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x1650.0
+Calculations completed successfully
+Response: {'dimensions': {'length': 8.0, 'width': 4.0, 'depth': 1.65}, 'pool_dimensions': {'mirror_area': 32.0, 'wall_area': 39.6, 'total_area': 71.6, 'water_volume': 47995.0}, 'excavation': {'base_area': 53.76, 'volume': 122.02, 'depth': 1.95, 'trucks': 15}, 'concrete_base': {'area': 46.41, 'volume': 4.64}, 'reinforcement': {'bottom_area': 38.25, 'wall_area': 42.9, 'total_area': 81.15, 'weight': 1.8}, 'backfill': {'perimeter': 28.2, 'volume': 29.47}, 'fixed_items': {'tractor_work': 1, 'grounding': 1, 'inlets': 8, 'concrete_pump': 1, 'aerated_blocks': 10, 'mapei_bags': 4, 'delivery': 1}}
+Received data: {'length': '8000', 'width': '4000', 'depth': '1650', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x1650.0
+Calculations completed successfully
+Response: {'dimensions': {'length': 8.0, 'width': 4.0, 'depth': 1.65}, 'pool_dimensions': {'mirror_area': 32.0, 'wall_area': 39.6, 'total_area': 71.6, 'water_volume': 47995.0}, 'excavation': {'base_area': 53.76, 'volume': 122.02, 'depth': 1.95, 'trucks': 15}, 'concrete_base': {'area': 46.41, 'volume': 4.64}, 'reinforcement': {'bottom_area': 38.25, 'wall_area': 42.9, 'total_area': 81.15, 'weight': 1.8}, 'backfill': {'perimeter': 28.2, 'volume': 29.47}, 'fixed_items': {'tractor_work': 1, 'grounding': 1, 'inlets': 8, 'concrete_pump': 1, 'aerated_blocks': 10, 'mapei_bags': 4, 'delivery': 1}}
+Received data: {'length': '8000', 'width': '4000', 'depth': '1650', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x1650.0
+Calculations completed successfully
+Response: {'pool_dimensions': {'mirror_area': 32.0, 'wall_area': 39.6, 'total_area': 71.6, 'water_volume': 47995.0}, 'excavation': {'base_area': 53.76, 'volume': 122.02, 'depth': 1.95, 'trucks': 15}, 'reinforcement': {'bottom_area': 38.25, 'wall_area': 42.9, 'total_area': 81.15, 'weight': 1.8}, 'backfill': {'perimeter': 22.1, 'volume': 74.03}, 'fixed_items': {'tractor_work': 1, 'grounding': 1, 'inlets': 8, 'concrete_pump': 1, 'aerated_blocks': 12, 'mapei_bags': 8, 'delivery': 1}, 'costs': {'equipment': {'items': {'filter_unit': 79975.0, 'skimmer': 18230.0, 'inlet': 7916.0, 'bottom_drain': 4727.0, 'led_light': 52258.0, 'transformer': 6256.0, 'dosing_box': 2156.0, 'sand': 6912.0, 'chemical_startup': 12318.0, 'maintenance_kit': 17580.0, 'installation': 102000.0, 'control_panel': 48000.0, 'equipment_installation': 186000.0, 'liner': 386639.99999999994, 'coping_stone': 119600.0}, 'total': 1050568.0}, 'materials': {'items': {'excavation': 48808.0, 'soil_removal': 97500.0, 'sand': 7600.0, 'gravel': 9700.0, 'plywood': 91200.0, 'rebar': 117000.0, 'timber_50x50': 11700.0, 'timber_100x50': 41600.0, 'hardware_kit': 60000.0, 'concrete_m200': 28750.0, 'concrete_m300': 133000.0, 'grounding_kit': 8000.0, 'concrete_pump': 44000.0, 'aerated_blocks': 3876.0, 'mapefill': 11200.0, 'primer': 2300.0, 'tile_adhesive': 3720.0, 'reinforced_plaster': 40200.0, 'k80_adhesive': 7100.0, 'coping_grout': 4200.0, 'coping_sealant': 7680.0, 'material_delivery': 30000.0}, 'total': 809134.0}, 'labor': {'items': {'pool_markup': 34800.0, 'tractor_work': 15000.0, 'manual_excavation': 23200.0, 'gravel_base': 29000.0, 'grounding_installation': 8000.0, 'concrete_base': 37600.0, 'outer_formwork': 32110.0, 'reinforcement_installation': 142450.0, 'inner_formwork': 29700.0, 'inlet_preparation': 13500.0, 'concrete_walls': 140000.0, 'formwork_removal': 26700.0, 'steps_installation': 60000.0, 'equipment_mounting': 27000.0, 'backfill': 36000.0, 'communications': 14400.0, 'surface_primer': 7159.999999999999, 'adhesive_application': 21480.0, 'plastering': 71600.0, 'coping_installation': 65000.0, 'materials_handling': 30000.0}, 'total': 864700.0}, 'total': 2724402.0}}
+Received data: {'length': '8000', 'width': '4000', 'depth': '1650', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x1650.0
+Calculations completed successfully
+Response: {'pool_dimensions': {'mirror_area': 32.0, 'wall_area': 39.6, 'total_area': 71.6, 'water_volume': 47995.0}, 'excavation': {'base_area': 53.76, 'volume': 122.02, 'depth': 1.95, 'trucks': 15}, 'reinforcement': {'bottom_area': 38.25, 'wall_area': 42.9, 'total_area': 81.15, 'weight': 1.8}, 'backfill': {'perimeter': 22.1, 'volume': 74.03}, 'fixed_items': {'tractor_work': 1, 'grounding': 1, 'inlets': 8, 'concrete_pump': 1, 'aerated_blocks': 12, 'mapei_bags': 8, 'delivery': 1}, 'costs': {'equipment': {'items': {'filter_unit': 79975.0, 'skimmer': 18230.0, 'inlet': 7916.0, 'bottom_drain': 4727.0, 'led_light': 52258.0, 'transformer': 6256.0, 'dosing_box': 2156.0, 'sand': 6912.0, 'chemical_startup': 12318.0, 'maintenance_kit': 17580.0, 'installation': 102000.0, 'control_panel': 48000.0, 'equipment_installation': 186000.0, 'liner': 486000.0, 'coping_stone': 119600.0}, 'total': 1149928.0}, 'materials': {'items': {'excavation': 48800.0, 'soil_removal': 97500.0, 'sand': 7600.0, 'gravel': 9700.0, 'plywood': 91200.0, 'rebar': 117000.0, 'timber_50x50': 11700.0, 'timber_100x50': 41600.0, 'hardware_kit': 60000.0, 'concrete_m200': 28750.0, 'concrete_m300': 133000.0, 'grounding_kit': 8000.0, 'concrete_pump': 44000.0, 'aerated_blocks': 3876.0, 'mapefill': 11200.0, 'primer': 2300.0, 'tile_adhesive': 3720.0, 'reinforced_plaster': 40200.0, 'k80_adhesive': 7100.0, 'coping_grout': 4200.0, 'coping_sealant': 7680.0, 'material_delivery': 30000.0}, 'total': 809126.0}, 'labor': {'items': {'pool_markup': 37502.87, 'tractor_work': 16165.03, 'manual_excavation': 25001.91, 'gravel_base': 31252.39, 'grounding_installation': 8621.35, 'concrete_base': 40520.34, 'outer_formwork': 34603.94, 'reinforcement_installation': 153513.89, 'inner_formwork': 32006.76, 'inlet_preparation': 14548.53, 'concrete_walls': 150873.6, 'formwork_removal': 28773.75, 'steps_installation': 64660.11, 'equipment_mounting': 29097.05, 'backfill': 38796.07, 'communications': 15518.43, 'surface_primer': 7716.11, 'adhesive_application': 23148.32, 'plastering': 77161.07, 'coping_installation': 70048.46, 'materials_handling': 32330.06}, 'total': 931860.04}, 'total': 2890914.04}}
+Received data: {'length': '8000', 'width': '4000', 'depth': '1650', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x1650.0
+Calculations completed successfully
+Response: {'pool_dimensions': {'mirror_area': 32.0, 'wall_area': 39.6, 'total_area': 71.6, 'water_volume': 47995.0}, 'excavation': {'base_area': 53.76, 'volume': 122.02, 'depth': 1.95, 'trucks': 15}, 'reinforcement': {'bottom_area': 38.25, 'wall_area': 42.9, 'total_area': 81.15, 'weight': 1.8}, 'backfill': {'perimeter': 22.1, 'volume': 74.03}, 'fixed_items': {'tractor_work': 1, 'grounding': 1, 'inlets': 8, 'concrete_pump': 1, 'aerated_blocks': 12, 'mapei_bags': 8, 'delivery': 1}, 'costs': {'equipment': {'items': {'filter_unit': 79975.0, 'skimmer': 18230.0, 'inlet': 7916.0, 'bottom_drain': 4727.0, 'led_light': 52258.0, 'transformer': 6256.0, 'dosing_box': 2156.0, 'sand': 6912.0, 'chemical_startup': 12318.0, 'maintenance_kit': 17580.0, 'installation': 102000.0, 'control_panel': 48000.0, 'equipment_installation': 186000.0, 'liner': 486000.0, 'coping_stone': 119600.0}, 'total': 1149928.0}, 'materials': {'items': {'excavation': 49327.73, 'soil_removal': 98554.38, 'sand': 7682.19, 'gravel': 9804.9, 'plywood': 92186.25, 'rebar': 118265.25, 'timber_50x50': 11826.53, 'timber_100x50': 42049.87, 'hardware_kit': 60648.85, 'concrete_m200': 29060.91, 'concrete_m300': 134438.28, 'grounding_kit': 8086.51, 'concrete_pump': 44475.82, 'aerated_blocks': 3917.92, 'mapefill': 11321.12, 'primer': 2324.87, 'tile_adhesive': 3760.23, 'reinforced_plaster': 40634.73, 'k80_adhesive': 7176.78, 'coping_grout': 4245.42, 'coping_sealant': 7763.05, 'material_delivery': 30324.42}, 'total': 817876.01}, 'labor': {'items': {'pool_markup': 37502.87, 'tractor_work': 16165.03, 'manual_excavation': 25001.91, 'gravel_base': 31252.39, 'grounding_installation': 8621.35, 'concrete_base': 40520.34, 'outer_formwork': 34603.94, 'reinforcement_installation': 153513.89, 'inner_formwork': 32006.76, 'inlet_preparation': 14548.53, 'concrete_walls': 150873.6, 'formwork_removal': 28773.75, 'steps_installation': 64660.11, 'equipment_mounting': 29097.05, 'backfill': 38796.07, 'communications': 15518.43, 'surface_primer': 7716.11, 'adhesive_application': 23148.32, 'plastering': 77161.07, 'coping_installation': 70048.46, 'materials_handling': 32330.06}, 'total': 931860.04}, 'total': 2899664.05}}
+Received data: {'length': '4000', 'width': '8000', 'depth': '2000', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 4000.0x8000.0x2000.0
+Error occurred: 'inner_perimeter'
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 547, in calculate
+    result = calculator.calculate()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 519, in calculate
+    results = self.calculate_all()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 471, in calculate_all
+    inner_formwork = dimensions["inner_perimeter"] * (self.depth / 1000)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'inner_perimeter'
+
+Received data: {'length': '4000', 'width': '8000', 'depth': '2000', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 4000.0x8000.0x2000.0
+Error occurred: 'inner_perimeter'
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 547, in calculate
+    result = calculator.calculate()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 519, in calculate
+    results = self.calculate_all()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 471, in calculate_all
+    inner_formwork = dimensions["inner_perimeter"] * (self.depth / 1000)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'inner_perimeter'
+
+Received data: {'length': '8000', 'width': '4000', 'depth': '2000', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x2000.0
+Error occurred: 'inner_perimeter'
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 547, in calculate
+    result = calculator.calculate()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 519, in calculate
+    results = self.calculate_all()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/CascadeProjects/pool-calc/app.py", line 471, in calculate_all
+    inner_formwork = dimensions["inner_perimeter"] * (self.depth / 1000)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'inner_perimeter'
+
+Received data: {'length': '8000', 'width': '4000', 'depth': '2000', 'concrete_type': 'm300', 'pool_type': 'liner', 'reinforcement_step': '200'}
+Dimensions: 8000.0x4000.0x2000.0
+Calculations completed successfully
+Response: {'excavation': {'length': 9.6, 'width': 5.6, 'depth': 2.45, 'area': 53.76, 'volume': 131.71}, 'concrete_base': {'length': 9.1, 'width': 5.1, 'area': 46.41, 'volume': 4.64}, 'formwork': {'perimeter': 33.0, 'area': 66.0}, 'reinforcement': {'bottom_area': 46.41, 'wall_area': 66.0, 'total_area': 112.41, 'weight': 2473.0}, 'walls_concrete': {'bottom_volume': 11.6, 'walls_volume': 16.5, 'total_volume': 28.1}}
+Received data: {'length': '1', 'width': '1', 'depth': '-1'}
+Dimensions: 1.0x1.0x-1.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '2000', 'width': '2000', 'depth': '2000'}
+Dimensions: 2000.0x2000.0x2000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '2000', 'width': '2000', 'depth': '2000'}
+Dimensions: 2000.0x2000.0x2000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '2000', 'width': '2000', 'depth': '2000'}
+Dimensions: 2000.0x2000.0x2000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '2000', 'width': '2000', 'depth': '2002'}
+Dimensions: 2000.0x2000.0x2002.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '2000', 'width': '2000', 'depth': '2002'}
+Dimensions: 2000.0x2000.0x2002.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 402, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 106, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': '3000', 'width': '2000', 'depth': '1000'}
+Dimensions: 3000.0x2000.0x1000.0
+Calculations completed successfully
+Response: {'parameters': {'mirror_area': 6.0, 'wall_area': 10.0, 'total_area': 16.0, 'volume': 6000, 'perimeter': 10.0}, 'excavation': {'length': 4600.0, 'width': 3600.0, 'depth': 1450.0, 'area': 16.56, 'volume': 24.011999999999997, 'backfill_volume': 11.141568, 'removal_volume': 12.870431999999997, 'removal_trucks': 2}, 'concrete': {'concrete_m300': 4.2, 'concrete_m200': 0.9}, 'materials': {'rebar_weight': 1.0, 'plywood_sheets': 24, 'soil_removal_trucks': 2}, 'costs': {'equipment': {'filter': 35000, 'skimmer': 4500, 'inlet': 2000, 'drain': 2500, 'light': 12000, 'transformer': 3000, 'dose_box': 500, 'sand': 2000, 'chemistry': 6000, 'care_set': 8000, 'installation_kit': 45000, 'control_panel': 25000, 'total': 145500}, 'materials': {'excavation': 15000, 'soil_removal': 13000, 'sand': 7600, 'gravel': 9700, 'plywood': 36000, 'rebar': 55000.0, 'concrete_m200': 4500.0, 'concrete_m300': 23100.0, 'delivery': 15000, 'handling': 15000, 'total': 193900.0}, 'labor': {'markup': 1800.0, 'manual_excavation': 1200.0, 'gravel_base': 1500.0, 'concrete_base': 2400.0, 'formwork': 5600.0, 'reinforcement': 12800.0, 'concrete_work': 17850.000000000004, 'equipment_mounting': 7500, 'grounding': 8000, 'equipment_installation': 45000, 'total': 103650.0}, 'total': 443050.0}}
+Received data: {'length': '3000', 'width': '2000', 'depth': '1000'}
+Dimensions: 3000.0x2000.0x1000.0
+Received data: {'length': '3000', 'width': '2000', 'depth': '1000'}
+Dimensions: 3000.0x2000.0x1000.0
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 251, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 251, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1001, 'wallThickness': 251, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1001.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 251, 'poolType': 'tile'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 2000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 2000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Error occurred: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+Traceback: Traceback (most recent call last):
+  File "/Users/artem/Downloads/pool-calc/app.py", line 410, in calculate
+    calculator = PoolCalculator(length, width, depth)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/artem/Downloads/pool-calc/app.py", line 107, in __init__
+    raise ValueError("Бассейн слишком маленький. Минимальные размеры: 3x2x1м")
+ValueError: Бассейн слишком маленький. Минимальные размеры: 3x2x1м
+
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Dimensions: 1000.0x1000.0x1000.0
+Received data: {'length': 1000, 'width': 1000, 'depth': 1000, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 1000x1000x1000mm
+Received data: {'length': 8000, 'width': 4000, 'depth': 1650, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 8000x4000x1650mm
+Received data: {'length': 8000, 'width': 4000, 'depth': 1650, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 8000x4000x1650mm
+Received data: {'length': 8000, 'width': 4000, 'depth': 1650, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 8000x4000x1650mm
+Received data: {'length': 8000, 'width': 4000, 'depth': 1650, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 8000x4000x1650mm
+Received data: {'length': 8000, 'width': 4000, 'depth': 1800, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 8000x4000x1800mm
+Received data: {'length': 20000, 'width': 4000, 'depth': 1800, 'wallThickness': 250, 'poolType': 'liner'}
+Processing dimensions: 20000x4000x1800mm

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Калькулятор бассейна</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 30px;
+        }
+        .result-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .result-section h3 {
+            margin-top: 0;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .total-cost {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .result-table tr {
+            border-bottom: 1px solid #eee;
+        }
+        .result-table td {
+            padding: 8px 0;
+        }
+        .result-table td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+        #debug {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор бассейна</h1>
+        <form id="poolForm">
+            <div class="form-group">
+                <label>Тип бассейна:</label>
+                <select id="poolType" name="poolType">
+                    <option value="liner">Под лайнер</option>
+                    <option value="tile">Под керамогранит/мозаику</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Длина (мм):</label>
+                <input type="number" id="length" name="length" min="1000" max="20000" required>
+                <div class="hint">Минимум: 1000 мм, Максимум: 20000 мм</div>
+                <div class="error" id="lengthError">Длина должна быть от 1000 до 20000 мм</div>
+            </div>
+
+            <div class="form-group">
+                <label>Ширина (мм):</label>
+                <input type="number" id="width" name="width" min="1000" max="20000" required>
+                <div class="hint">Минимум: 1000 мм, Максимум: 20000 мм</div>
+                <div class="error" id="widthError">Ширина должна быть от 1000 до 20000 мм</div>
+            </div>
+
+            <div class="form-group">
+                <label>Глубина (мм):</label>
+                <input type="number" id="depth" name="depth" min="1000" max="3000" required>
+                <div class="hint">Минимум: 1000 мм, Максимум: 3000 мм</div>
+                <div class="error" id="depthError">Глубина должна быть от 1000 до 3000 мм</div>
+            </div>
+
+            <div class="form-group">
+                <label>Толщина стен и дна (мм):</label>
+                <input type="number" id="wallThickness" name="wallThickness" value="250" min="200" max="300" required>
+                <div class="hint">Рекомендуемая толщина: 250 мм</div>
+            </div>
+
+            <button type="button" id="calculateButton">Рассчитать</button>
+        </form>
+
+        <div id="results" style="display: none;">
+            <div class="result-section">
+                <h3>Основные размеры</h3>
+                <div id="basicDimensions"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Земляные работы</h3>
+                <div id="earthworks"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Бетонные работы</h3>
+                <div id="concreteWorks"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Опалубка и армирование</h3>
+                <div id="formwork"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Отделочные работы</h3>
+                <div id="finishingWorks"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Материалы</h3>
+                <div id="materials"></div>
+            </div>
+
+            <div class="total-cost">
+                Общая стоимость: <span id="totalCost">0</span> ₽
+            </div>
+        </div>
+        
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        document.getElementById('calculateButton').addEventListener('click', async function() {
+            try {
+                // Сбрасываем сообщения об ошибках
+                document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+                document.getElementById('debug').textContent = '';
+                
+                // Получаем значения
+                const length = parseInt(document.getElementById('length').value);
+                const width = parseInt(document.getElementById('width').value);
+                const depth = parseInt(document.getElementById('depth').value);
+                const wallThickness = parseInt(document.getElementById('wallThickness').value);
+                const poolType = document.getElementById('poolType').value;
+
+                // Для отладки
+                const inputData = {length, width, depth, wallThickness, poolType};
+                console.log('Sending data:', inputData);
+                document.getElementById('debug').textContent = 'Отправка данных: ' + JSON.stringify(inputData);
+                document.getElementById('debug').style.display = 'block';
+                
+                // Валидация
+                let hasError = false;
+                if (length < 1000 || length > 20000) {
+                    document.getElementById('lengthError').style.display = 'block';
+                    hasError = true;
+                }
+                if (width < 1000 || width > 20000) {
+                    document.getElementById('widthError').style.display = 'block';
+                    hasError = true;
+                }
+                if (depth < 1000 || depth > 3000) {
+                    document.getElementById('depthError').style.display = 'block';
+                    hasError = true;
+                }
+
+                if (hasError) return;
+
+                // Отправляем данные на сервер
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(inputData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+                document.getElementById('debug').textContent += '\nПолучены данные: ' + JSON.stringify(data);
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Показываем результаты
+                document.getElementById('results').style.display = 'block';
+
+                // Заполняем секции результатов
+                const sections = ['basicDimensions', 'earthworks', 'concreteWorks', 'formwork', 'finishingWorks', 'materials'];
+                
+                sections.forEach(section => {
+                    const element = document.getElementById(section);
+                    if (data[section]) {
+                        element.innerHTML = formatSection(data[section]);
+                    } else {
+                        element.innerHTML = '<p>Нет данных</p>';
+                    }
+                });
+
+                // Обновляем общую стоимость
+                const totalCost = data.totalCost || 0;
+                document.getElementById('totalCost').textContent = new Intl.NumberFormat('ru-RU').format(totalCost);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('debug').style.display = 'block';
+                document.getElementById('debug').textContent += '\nОшибка: ' + error.message;
+            }
+        });
+
+        function formatSection(data) {
+            if (!data) return '<p>Нет данных</p>';
+            
+            let html = '<table class="result-table">';
+            for (let key in data) {
+                html += `<tr>
+                    <td>${key}</td>
+                    <td>${data[key]}</td>
+                </tr>`;
+            }
+            html += '</table>';
+            return html;
+        }
+    </script>
+</body>
+</html>
