@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор бассейна</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .result-section {
+            margin-top: 30px;
+        }
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .total-cost {
+            font-weight: bold;
+            font-size: 1.2em;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Калькулятор стоимости бассейна</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <form id="poolForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="length" class="form-label">Длина (мм):</label>
+                            <input type="number" class="form-control" id="length" name="length" min="1000" max="20000" value="8000" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="width" class="form-label">Ширина (мм):</label>
+                            <input type="number" class="form-control" id="width" name="width" min="1000" max="20000" value="4000" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="depth" class="form-label">Глубина (мм):</label>
+                            <input type="number" class="form-control" id="depth" name="depth" min="1000" max="3000" value="1500" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="wall_thickness" class="form-label">Толщина стенки (мм):</label>
+                            <input type="number" class="form-control" id="wall_thickness" name="wall_thickness" min="150" max="300" value="200" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pool_type" class="form-label">Тип бассейна:</label>
+                            <select class="form-select" id="pool_type" name="pool_type">
+                                <option value="liner">Лайнер</option>
+                                <option value="tile">Плитка</option>
+                                <option value="mosaic">Мозаика</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Рассчитать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="results" class="result-section hidden">
+            <h2 class="text-center mb-4">Результаты расчета</h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Основные размеры</h5>
+                        </div>
+                        <div class="card-body" id="basicDimensions">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Земляные работы</h5>
+                        </div>
+                        <div class="card-body" id="earthworks">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Бетонные работы</h5>
+                        </div>
+                        <div class="card-body" id="concrete">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">Опалубка и армирование</h5>
+                        </div>
+                        <div class="card-body" id="formwork">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card result-card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">Отделочные работы</h5>
+                        </div>
+                        <div class="card-body" id="finishing">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Стоимость материалов</h5>
+                        </div>
+                        <div class="card-body" id="materialsCost">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">Стоимость работ</h5>
+                        </div>
+                        <div class="card-body" id="worksCost">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Стоимость оборудования</h5>
+                        </div>
+                        <div class="card-body" id="equipmentCost">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card result-card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Итоговая стоимость</h5>
+                        </div>
+                        <div class="card-body" id="totalCost">
+                            <!-- Будет заполнено JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Новый раздел для детализированного расчета КП -->
+            <h2 class="text-center mb-4 mt-5">Детализированный расчет (КП)</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card result-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Основное оборудование</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Наименование</th>
+                                            <th>Ед.изм</th>
+                                            <th>Кол-во</th>
+                                            <th>Цена</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="equipmentItemsTable">
+                                        <!-- Будет заполнено JavaScript -->
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                            <td id="equipmentItemsTotal" class="fw-bold"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card result-card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Материал и расходы для выполнения работ</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Наименование</th>
+                                            <th>Ед.изм</th>
+                                            <th>Кол-во</th>
+                                            <th>Цена</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="materialsItemsTable">
+                                        <!-- Будет заполнено JavaScript -->
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                            <td id="materialsItemsTotal" class="fw-bold"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card result-card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">Основные работы</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Наименование</th>
+                                            <th>Ед.изм</th>
+                                            <th>Кол-во</th>
+                                            <th>Цена</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="worksItemsTable">
+                                        <!-- Будет заполнено JavaScript -->
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                            <td id="worksItemsTotal" class="fw-bold"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card result-card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">ИТОГОВАЯ СТОИМОСТЬ</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8 offset-md-2">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold">Итого по основному оборудованию:</td>
+                                                <td id="totalEquipmentCost" class="text-end"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold">Итого по материалам и расходам:</td>
+                                                <td id="totalMaterialsCost" class="text-end"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold">Итого по основным работам:</td>
+                                                <td id="totalWorksCost" class="text-end"></td>
+                                            </tr>
+                                            <tr class="table-dark">
+                                                <td class="fw-bold">ИТОГО ПО ВСЕМ ПОЗИЦИЯМ:</td>
+                                                <td id="grandTotalCost" class="text-end fw-bold"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="errorMessage" class="hidden">
+        <div class="alert alert-danger" role="alert">
+            <strong>Ошибка:</strong>
+            <span id="errorText"></span>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('poolForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                length: parseInt(document.getElementById('length').value),
+                width: parseInt(document.getElementById('width').value),
+                depth: parseInt(document.getElementById('depth').value),
+                wall_thickness: parseInt(document.getElementById('wall_thickness').value),
+                pool_type: document.getElementById('pool_type').value
+            };
+            
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Произошла ошибка при расчете');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayResults(data);
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('errorMessage').classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('results').classList.add('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').textContent = error.message || 'Произошла ошибка при расчете. Пожалуйста, попробуйте еще раз.';
+            });
+        });
+        
+        function displayResults(data) {
+            // Форматирование чисел
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
+            };
+            
+            // Основные размеры
+            const basicDimensionsHtml = Object.entries(data.basic_dimensions)
+                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                .join('');
+            document.getElementById('basicDimensions').innerHTML = basicDimensionsHtml;
+            
+            // Земляные работы
+            const earthworksHtml = Object.entries(data.earthworks)
+                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                .join('');
+            document.getElementById('earthworks').innerHTML = earthworksHtml;
+            
+            // Бетонные работы
+            const concreteHtml = Object.entries(data.concrete_works)
+                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                .join('');
+            document.getElementById('concrete').innerHTML = concreteHtml;
+            
+            // Опалубка и армирование
+            const formworkHtml = Object.entries(data.formwork)
+                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                .join('');
+            document.getElementById('formwork').innerHTML = formworkHtml;
+            
+            // Отделочные работы
+            let finishingHtml = `
+                <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof data.finishing.area === 'number' ? data.finishing.area.toFixed(1) : data.finishing.area} м²</span></div>
+                <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof data.finishing.perimeter === 'number' ? data.finishing.perimeter.toFixed(1) : data.finishing.perimeter} м/п</span></div>
+                <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(data.finishing.material_cost)}</span></div>
+                <div class="cost-item"><span>Стоимость копингового камня:</span> <span>${formatCurrency(data.finishing.coping_stone.total)}</span></div>
+                <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(data.finishing.work_cost)}</span></div>
+                <div class="total-cost"><span>Итого по отделке:</span> <span>${formatCurrency(data.finishing.total_cost)}</span></div>
+            `;
+            document.getElementById('finishing').innerHTML = finishingHtml;
+            
+            // Заполнение таблиц детализированного КП
+            let equipmentHtml = '';
+            data.kp_items.equipment_items.forEach((item, index) => {
+                const itemTotal = item.qty * item.price;
+                equipmentHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(itemTotal)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('equipmentItemsTable').innerHTML = equipmentHtml;
+            document.getElementById('equipmentItemsTotal').textContent = formatCurrency(data.kp_items.equipment_total);
+            
+            let materialsHtml = '';
+            data.kp_items.materials_items.forEach((item, index) => {
+                const itemTotal = item.qty * item.price;
+                materialsHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(itemTotal)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('materialsItemsTable').innerHTML = materialsHtml;
+            document.getElementById('materialsItemsTotal').textContent = formatCurrency(data.kp_items.materials_total);
+            
+            let worksHtml = '';
+            data.kp_items.works_items.forEach((item, index) => {
+                const itemTotal = item.qty * item.price;
+                worksHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(itemTotal)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('worksItemsTable').innerHTML = worksHtml;
+            document.getElementById('worksItemsTotal').textContent = formatCurrency(data.kp_items.works_total);
+            
+            // Заполнение итоговой таблицы
+            document.getElementById('totalEquipmentCost').textContent = formatCurrency(data.kp_items.equipment_total);
+            document.getElementById('totalMaterialsCost').textContent = formatCurrency(data.kp_items.materials_total);
+            document.getElementById('totalWorksCost').textContent = formatCurrency(data.kp_items.works_total);
+            document.getElementById('grandTotalCost').textContent = formatCurrency(data.costs.total);
+            
+            // Стоимость материалов и оборудования (для обратной совместимости)
+            let equipmentCostHtml = '';
+            equipmentCostHtml += `<div class="total-cost"><span>Итого по оборудованию:</span> <span>${formatCurrency(data.kp_items.equipment_total)}</span></div>`;
+            document.getElementById('equipmentCost').innerHTML = equipmentCostHtml;
+            
+            // Итоговая стоимость (сводная)
+            const totalCostHtml = `
+                <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(data.costs.materials_total)}</span></div>
+                <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(data.costs.works_total)}</span></div>
+                <div class="cost-item"><span>Стоимость оборудования:</span> <span>${formatCurrency(data.costs.equipment_total)}</span></div>
+                <div class="total-cost"><span>ИТОГО:</span> <span>${formatCurrency(data.costs.total)}</span></div>
+            `;
+            document.getElementById('totalCost').innerHTML = totalCostHtml;
+        }
+    </script>
+</body>
+</html> 
