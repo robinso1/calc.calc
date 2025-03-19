@@ -203,6 +203,107 @@
                 </div>
             </div>
         </div>
+
+        <!-- Секция для сравнения с КП -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Сравнение с коммерческим предложением</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Основные размеры из КП</h6>
+                        <div class="mb-3">
+                            <label for="kp-water-surface" class="form-label">Площадь водной поверхности (м²)</label>
+                            <input type="number" class="form-control" id="kp-water-surface" value="32">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-perimeter" class="form-label">Периметр (м/п)</label>
+                            <input type="number" class="form-control" id="kp-perimeter" value="26">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-wall-area" class="form-label">Площадь стен (м²)</label>
+                            <input type="number" class="form-control" id="kp-wall-area" value="39.6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-finishing-area" class="form-label">Площадь под отделку (м²)</label>
+                            <input type="number" class="form-control" id="kp-finishing-area" value="71.6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-water-volume" class="form-label">Объем воды (м³)</label>
+                            <input type="number" class="form-control" id="kp-water-volume" value="48">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Стоимость из КП</h6>
+                        <div class="mb-3">
+                            <label for="kp-materials-cost" class="form-label">Стоимость материалов (руб)</label>
+                            <input type="number" class="form-control" id="kp-materials-cost" value="817876">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-work-cost" class="form-label">Стоимость работ (руб)</label>
+                            <input type="number" class="form-control" id="kp-work-cost" value="931860">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-equipment-cost" class="form-label">Стоимость оборудования (руб)</label>
+                            <input type="number" class="form-control" id="kp-equipment-cost" value="1149928">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kp-total-cost" class="form-label">Общая стоимость (руб)</label>
+                            <input type="number" class="form-control" id="kp-total-cost" value="2899664">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100" id="compare-btn">Сравнить с расчетами</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Результат сравнения -->
+        <div class="card mt-4 hidden" id="comparison-result">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Результаты сравнения</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Сравнение основных размеров</h6>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Параметр</th>
+                                    <th>Калькулятор</th>
+                                    <th>КП</th>
+                                    <th>Разница</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dimensions-comparison">
+                                <!-- Сюда будут добавлены данные через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Сравнение стоимости</h6>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Статья расходов</th>
+                                    <th>Калькулятор</th>
+                                    <th>КП</th>
+                                    <th>Разница</th>
+                                </tr>
+                            </thead>
+                            <tbody id="costs-comparison">
+                                <!-- Сюда будут добавлены данные через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div id="errorMessage" class="hidden">
@@ -213,6 +314,7 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.getElementById('poolForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -332,6 +434,140 @@
             `;
             document.getElementById('totalCost').innerHTML = totalCostHtml;
         }
+
+        $(document).ready(function() {
+            // Код для сравнения с КП
+            $("#compare-btn").click(function() {
+                // Получаем параметры бассейна из формы
+                const length = parseFloat($("#length").val());
+                const width = parseFloat($("#width").val());
+                const depth = parseFloat($("#depth").val());
+                const wallThickness = parseFloat($("#wall_thickness").val());
+                const poolType = $("#pool_type").val();
+                
+                // Получаем данные из КП
+                const estimateData = {
+                    water_surface: $("#kp-water-surface").val(),
+                    perimeter: $("#kp-perimeter").val(),
+                    wall_area: $("#kp-wall-area").val(),
+                    finishing_area: $("#kp-finishing-area").val(),
+                    water_volume: $("#kp-water-volume").val(),
+                    materials_cost: $("#kp-materials-cost").val(),
+                    work_cost: $("#kp-work-cost").val(),
+                    equipment_cost: $("#kp-equipment-cost").val(),
+                    total_cost: $("#kp-total-cost").val()
+                };
+                
+                // Отправляем запрос на сервер
+                $.ajax({
+                    url: "/compare_estimate",
+                    type: "POST",
+                    data: JSON.stringify({
+                        length: length,
+                        width: width,
+                        depth: depth,
+                        wall_thickness: wallThickness,
+                        pool_type: poolType,
+                        estimate: estimateData
+                    }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            // Показываем результат сравнения
+                            $("#comparison-result").removeClass("hidden");
+                            
+                            // Заполняем таблицу сравнения размеров
+                            const dimensions = response.comparison.dimensions;
+                            let dimensionsHtml = "";
+                            
+                            dimensionsHtml += createComparisonRow("Площадь водной поверхности (м²)", 
+                                dimensions.water_surface.calc, 
+                                dimensions.water_surface.estimate, 
+                                dimensions.water_surface.diff);
+                                
+                            dimensionsHtml += createComparisonRow("Периметр (м/п)", 
+                                dimensions.perimeter.calc, 
+                                dimensions.perimeter.estimate, 
+                                dimensions.perimeter.diff);
+                                
+                            dimensionsHtml += createComparisonRow("Площадь стен (м²)", 
+                                dimensions.wall_area.calc, 
+                                dimensions.wall_area.estimate, 
+                                dimensions.wall_area.diff);
+                                
+                            dimensionsHtml += createComparisonRow("Площадь под отделку (м²)", 
+                                dimensions.finishing_area.calc, 
+                                dimensions.finishing_area.estimate, 
+                                dimensions.finishing_area.diff);
+                                
+                            dimensionsHtml += createComparisonRow("Объем воды (м³)", 
+                                dimensions.water_volume.calc, 
+                                dimensions.water_volume.estimate, 
+                                dimensions.water_volume.diff);
+                                
+                            $("#dimensions-comparison").html(dimensionsHtml);
+                            
+                            // Заполняем таблицу сравнения стоимости
+                            const costs = response.comparison.costs;
+                            let costsHtml = "";
+                            
+                            costsHtml += createComparisonRow("Материалы (руб)", 
+                                formatNumber(costs.materials.calc), 
+                                formatNumber(costs.materials.estimate), 
+                                formatNumber(costs.materials.diff));
+                                
+                            costsHtml += createComparisonRow("Работы (руб)", 
+                                formatNumber(costs.work.calc), 
+                                formatNumber(costs.work.estimate), 
+                                formatNumber(costs.work.diff));
+                                
+                            costsHtml += createComparisonRow("Оборудование (руб)", 
+                                formatNumber(costs.equipment.calc), 
+                                formatNumber(costs.equipment.estimate), 
+                                formatNumber(costs.equipment.diff));
+                                
+                            costsHtml += createComparisonRow("Итого (руб)", 
+                                formatNumber(costs.total.calc), 
+                                formatNumber(costs.total.estimate), 
+                                formatNumber(costs.total.diff), true);
+                                
+                            $("#costs-comparison").html(costsHtml);
+                            
+                            // Прокручиваем страницу к результатам
+                            $('html, body').animate({
+                                scrollTop: $("#comparison-result").offset().top - 20
+                            }, 500);
+                        } else {
+                            alert("Ошибка при сравнении: " + response.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Ошибка при отправке запроса: " + error);
+                    }
+                });
+            });
+            
+            // Функция для создания строки сравнения
+            function createComparisonRow(label, calc, estimate, diff, isTotal = false) {
+                const diffClass = diff > 0 ? "text-danger" : (diff < 0 ? "text-success" : "");
+                const diffPrefix = diff > 0 ? "+" : "";
+                
+                let rowClass = isTotal ? "fw-bold" : "";
+                
+                return `<tr class="${rowClass}">
+                    <td>${label}</td>
+                    <td>${calc}</td>
+                    <td>${estimate}</td>
+                    <td class="${diffClass}">${diffPrefix}${diff}</td>
+                </tr>`;
+            }
+            
+            // Форматирование чисел
+            function formatNumber(num) {
+                return parseFloat(num).toLocaleString('ru-RU');
+            }
+        });
     </script>
 </body>
 </html> 

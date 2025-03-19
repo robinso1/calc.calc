@@ -735,6 +735,94 @@ def calculate():
         print(f"Детали ошибки: {error_details}")
         return jsonify({"error": str(e), "details": error_details}), 500
 
+@app.route('/compare_estimate', methods=['POST'])
+def compare_estimate():
+    """Сравнение коммерческого предложения с расчетами калькулятора"""
+    try:
+        data = request.json
+        
+        # Получаем основные параметры бассейна
+        length = data.get('length', 0)
+        width = data.get('width', 0)
+        depth = data.get('depth', 0)
+        wall_thickness = data.get('wall_thickness', 0)
+        
+        # Получаем данные из КП
+        estimate_data = data.get('estimate', {})
+        
+        # Выполняем расчеты с помощью калькулятора
+        basic_dimensions = calculate_basic_dimensions(length, width, depth, wall_thickness)
+        
+        # Преобразуем строковые значения в числовые
+        calc_dimensions = {}
+        for key, value in basic_dimensions.items():
+            parts = value.split()
+            if len(parts) > 0:
+                calc_dimensions[key] = float(parts[0])
+        
+        # Сравниваем основные размеры
+        comparison = {
+            'dimensions': {
+                'water_surface': {
+                    'calc': calc_dimensions.get("Площадь водной поверхности", 0),
+                    'estimate': float(estimate_data.get('water_surface', 0)),
+                    'diff': round(calc_dimensions.get("Площадь водной поверхности", 0) - float(estimate_data.get('water_surface', 0)), 1)
+                },
+                'perimeter': {
+                    'calc': calc_dimensions.get("Периметр", 0),
+                    'estimate': float(estimate_data.get('perimeter', 0)),
+                    'diff': round(calc_dimensions.get("Периметр", 0) - float(estimate_data.get('perimeter', 0)), 1)
+                },
+                'wall_area': {
+                    'calc': calc_dimensions.get("Площадь стен", 0),
+                    'estimate': float(estimate_data.get('wall_area', 0)),
+                    'diff': round(calc_dimensions.get("Площадь стен", 0) - float(estimate_data.get('wall_area', 0)), 1)
+                },
+                'finishing_area': {
+                    'calc': calc_dimensions.get("Площадь под отделку", 0),
+                    'estimate': float(estimate_data.get('finishing_area', 0)),
+                    'diff': round(calc_dimensions.get("Площадь под отделку", 0) - float(estimate_data.get('finishing_area', 0)), 1)
+                },
+                'water_volume': {
+                    'calc': calc_dimensions.get("Объем воды", 0),
+                    'estimate': float(estimate_data.get('water_volume', 0)),
+                    'diff': round(calc_dimensions.get("Объем воды", 0) - float(estimate_data.get('water_volume', 0)), 1)
+                }
+            },
+            'costs': {
+                'materials': {
+                    'calc': 0,
+                    'estimate': float(estimate_data.get('materials_cost', 0)),
+                    'diff': -float(estimate_data.get('materials_cost', 0))
+                },
+                'work': {
+                    'calc': 0,
+                    'estimate': float(estimate_data.get('work_cost', 0)),
+                    'diff': -float(estimate_data.get('work_cost', 0))
+                },
+                'equipment': {
+                    'calc': 0,
+                    'estimate': float(estimate_data.get('equipment_cost', 0)),
+                    'diff': -float(estimate_data.get('equipment_cost', 0))
+                },
+                'total': {
+                    'calc': 0,
+                    'estimate': float(estimate_data.get('total_cost', 0)),
+                    'diff': -float(estimate_data.get('total_cost', 0))
+                }
+            }
+        }
+        
+        return jsonify({
+            'success': True,
+            'comparison': comparison
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3333))
     app.run(host='0.0.0.0', port=port, debug=True) 
