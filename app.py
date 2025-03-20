@@ -568,6 +568,538 @@ def calculate_fixed_values():
         "total_cost": 2899664  # Фиксированная итоговая стоимость из КП
     }
 
+def calculate_kp_items(length, width, depth, pool_type):
+    """Расчет позиций для коммерческого предложения в формате ООО "ДОН БАСС" """
+    
+    # Используем те же наименования, что в КП ООО "ДОН БАСС"
+    # Оборудование
+    equipment_items = [
+        {
+            "name": "Фильтрационная установка Hayward PWL D611 81073 (14m3/h, верх)",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 79975.00
+        },
+        {
+            "name": "Скиммер под лайнер Aquaviva Wide EM0020V",
+            "unit": "шт.",
+            "qty": 2,
+            "price": 9115.00
+        },
+        {
+            "name": "Форсунка стеновая под лайнер Aquaviva EM4414 (50 мм/2\" сопло \"круг\", латунные вставки",
+            "unit": "шт.",
+            "qty": 4,
+            "price": 1979.00
+        },
+        {
+            "name": "Слив донный под лайнер Aquaviva EM2837",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 4727.00
+        },
+        {
+            "name": "Прожектор светодиодный Aquaviva LED003 546LED (36 Вт) White",
+            "unit": "шт.",
+            "qty": 2,
+            "price": 26129.00
+        },
+        {
+            "name": "Трансформатор Aquant 105 Вт-12В",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 6256.00
+        },
+        {
+            "name": "Дозовая коробка Aquaviva EM2823",
+            "unit": "шт.",
+            "qty": 2,
+            "price": 1078.00
+        },
+        {
+            "name": "Песок кварцевый 25кг Aquaviva 0,5-0,8 мм",
+            "unit": "шт.",
+            "qty": 6,
+            "price": 1152.00
+        },
+        {
+            "name": "Набор химии для запуска бассейна",
+            "unit": "компл",
+            "qty": 1,
+            "price": 12318.00
+        },
+        {
+            "name": "Набор для ухода за бассейном",
+            "unit": "компл",
+            "qty": 1,
+            "price": 17580.00
+        },
+        {
+            "name": "Инсталляция ( трубы, краны, фитинги )",
+            "unit": "компл",
+            "qty": 1,
+            "price": 102000.00
+        },
+        {
+            "name": "Щит Электра контроля",
+            "unit": "компл",
+            "qty": 1,
+            "price": 48000.00
+        },
+        {
+            "name": "Монтаж и наладка оборудования, запуск",
+            "unit": "услуга",
+            "qty": 1,
+            "price": 186000.00
+        }
+    ]
+    
+    # Добавляем лайнер или другую отделку в зависимости от типа бассейна
+    if pool_type == "liner":
+        equipment_items.append({
+            "name": "Лайнер Cefil Urdike (синий) , геотекстиль , клей , крепление , работа",
+            "unit": "м2",
+            "qty": 90,
+            "price": 5400.00
+        })
+    elif pool_type == "tile":
+        equipment_items.append({
+            "name": "Плитка для бассейна, клей, затирка, работа",
+            "unit": "м2",
+            "qty": 90,
+            "price": 8900.00
+        })
+    else:  # mosaic
+        equipment_items.append({
+            "name": "Мозаика для бассейна, клей, затирка, работа",
+            "unit": "м2",
+            "qty": 90,
+            "price": 12300.00
+        })
+    
+    # Добавляем копинговый камень
+    equipment_items.append({
+        "name": "Копинговый камень",
+        "unit": "шт.",
+        "qty": 46,
+        "price": 2600.00
+    })
+    
+    # Расчет общей стоимости оборудования
+    equipment_total = sum(item["qty"] * item["price"] for item in equipment_items)
+    
+    # Материалы
+    materials_items = [
+        {
+            "name": "Выемка грунта под бассейн механизированным способом",
+            "unit": "м3",
+            "qty": 122,
+            "price": 400.00
+        },
+        {
+            "name": "Вывоз чистого грунта с территории участка",
+            "unit": "КамАЗ",
+            "qty": 15,
+            "price": 6500.00
+        },
+        {
+            "name": "Песок по факту с доставкой 6 м3",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 7600.00
+        },
+        {
+            "name": "Щебень по факту с доставкой 10 т",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 9700.00
+        },
+        {
+            "name": "Фанера 1520/1520/18",
+            "unit": "лист",
+            "qty": 48,
+            "price": 1900.00
+        },
+        {
+            "name": "Арматура d-12",
+            "unit": "т",
+            "qty": 1.8,
+            "price": 65000.00
+        },
+        {
+            "name": "Брус 50/50",
+            "unit": "м/п",
+            "qty": 130,
+            "price": 90.00
+        },
+        {
+            "name": "Брус 100/50",
+            "unit": "м/п",
+            "qty": 320,
+            "price": 130.00
+        },
+        {
+            "name": "Тяжи, проволока вязальная, диски по металлу, саморезы , труба квадрат , буры , диск по дереву и т д",
+            "unit": "компл.",
+            "qty": 1,
+            "price": 60000.00
+        },
+        {
+            "name": "Бетон М-200 с доставкой",
+            "unit": "м3",
+            "qty": 5,
+            "price": 5750.00
+        },
+        {
+            "name": "Бетон М-300 с доставкой",
+            "unit": "м3",
+            "qty": 20,
+            "price": 6650.00
+        },
+        {
+            "name": "Уголок на заземление",
+            "unit": "компл.",
+            "qty": 1,
+            "price": 8000.00
+        },
+        {
+            "name": "Бетононасос",
+            "unit": "услуга",
+            "qty": 1,
+            "price": 44000.00
+        },
+        {
+            "name": "Блок газобетонный Hebel D500 625x250x250 мм",
+            "unit": "шт.",
+            "qty": 12,
+            "price": 323.00
+        },
+        {
+            "name": "Бетон М200 с доставкой",
+            "unit": "м3",
+            "qty": 1,
+            "price": 8750.00
+        },
+        {
+            "name": "MAPEI MAPEFILL 25кг для закладных деталей",
+            "unit": "шт.",
+            "qty": 8,
+            "price": 1400.00
+        },
+        {
+            "name": "Грунтовка СТ-17",
+            "unit": "шт.",
+            "qty": 2,
+            "price": 1150.00
+        },
+        {
+            "name": "Клей плиточный ЕС-3000",
+            "unit": "шт.",
+            "qty": 8,
+            "price": 465.00
+        },
+        {
+            "name": "Штукатурка фиброармированная высокопрочная",
+            "unit": "шт.",
+            "qty": 60,
+            "price": 670.00
+        },
+        {
+            "name": "Клей к-80",
+            "unit": "шт.",
+            "qty": 5,
+            "price": 1420.00
+        },
+        {
+            "name": "Затирка для копинга",
+            "unit": "компл.",
+            "qty": 1,
+            "price": 4200.00
+        },
+        {
+            "name": "Герметик для копинга",
+            "unit": "шт.",
+            "qty": 6,
+            "price": 1280.00
+        },
+        {
+            "name": "Доставка и покупка материала",
+            "unit": "услуга",
+            "qty": 1,
+            "price": 30000.00
+        }
+    ]
+    
+    # Расчет общей стоимости материалов
+    materials_total = sum(item["qty"] * item["price"] for item in materials_items)
+    
+    # Работы
+    works_items = [
+        {
+            "name": "Разметка бассейна для техники, нивелировка, привязка к территории по всем этапам работ",
+            "unit": "м2",
+            "qty": 58,
+            "price": 600.00
+        },
+        {
+            "name": "Работа с трактором",
+            "unit": "услуга",
+            "qty": 1,
+            "price": 15000.00
+        },
+        {
+            "name": "Доработка грунта вручную",
+            "unit": "м2",
+            "qty": 58,
+            "price": 400.00
+        },
+        {
+            "name": "Отсыпка щебнем дна бассейна, трамбовка",
+            "unit": "м2",
+            "qty": 58,
+            "price": 500.00
+        },
+        {
+            "name": "Устройство контур заземления",
+            "unit": "шт.",
+            "qty": 1,
+            "price": 8000.00
+        },
+        {
+            "name": "Бетонирование подбетонки с миксера",
+            "unit": "м2",
+            "qty": 47,
+            "price": 800.00
+        },
+        {
+            "name": "Монтаж наружной опалубки стен для бетонирования стен и дна бассейна монолитом",
+            "unit": "м2",
+            "qty": 49.4,
+            "price": 650.00
+        },
+        {
+            "name": "Армировка двойным каркасом бассейна дно и стены",
+            "unit": "м2",
+            "qty": 81.4,
+            "price": 1750.00
+        },
+        {
+            "name": "Монтаж внутренней опалубки",
+            "unit": "м2",
+            "qty": 39.6,
+            "price": 750.00
+        },
+        {
+            "name": "Изготовление проемов под закладные детали",
+            "unit": "шт.",
+            "qty": 9,
+            "price": 1500.00
+        },
+        {
+            "name": "Бетонирование бассейна монолитом дно и стены",
+            "unit": "м3",
+            "qty": 20,
+            "price": 7000.00
+        },
+        {
+            "name": "Демонтаж опалубки",
+            "unit": "м2",
+            "qty": 89,
+            "price": 300.00
+        },
+        {
+            "name": "Изготовление веерных ступеней в бассейне",
+            "unit": "шт.",
+            "qty": 5,
+            "price": 12000.00
+        },
+        {
+            "name": "Монтаж опалубки, бетонирование закладных деталей оборудования",
+            "unit": "шт.",
+            "qty": 9,
+            "price": 3000.00
+        },
+        {
+            "name": "Обратная отсыпка чаши бассейна глиной или песком с послойным уплотнением",
+            "unit": "м3",
+            "qty": 30,
+            "price": 1200.00
+        },
+        {
+            "name": "Отсыпка коммуникаций бассейна песком",
+            "unit": "м/п",
+            "qty": 32,
+            "price": 450.00
+        },
+        {
+            "name": "Грунтовка бассейна под штукатурку",
+            "unit": "м2",
+            "qty": 71.6,
+            "price": 100.00
+        },
+        {
+            "name": "Нанесение клея под гребенку для улучшения адгезии",
+            "unit": "м2",
+            "qty": 71.6,
+            "price": 300.00
+        },
+        {
+            "name": "Маячная штукатурка бассейна цементно песчаным раствором",
+            "unit": "м2",
+            "qty": 71.6,
+            "price": 1000.00
+        },
+        {
+            "name": "Грунтовка борта бассейна под штукатурку",
+            "unit": "м/п",
+            "qty": 26,
+            "price": 100.00
+        },
+        {
+            "name": "Нанесение клея под гребенку для улучшения адгезии",
+            "unit": "м/п",
+            "qty": 26,
+            "price": 300.00
+        },
+        {
+            "name": "Штукатурка борта бассейна",
+            "unit": "м/п",
+            "qty": 26,
+            "price": 1000.00
+        },
+        {
+            "name": "Грунтовка ступеней бассейна под штукатурку",
+            "unit": "м/п",
+            "qty": 14,
+            "price": 100.00
+        },
+        {
+            "name": "Нанесение клея под гребенку для улучшения адгезии",
+            "unit": "м/п",
+            "qty": 14,
+            "price": 300.00
+        },
+        {
+            "name": "Штукатурка ступеней",
+            "unit": "м/п",
+            "qty": 14,
+            "price": 1000.00
+        },
+        {
+            "name": "Грунтовка бассейна под лайнер",
+            "unit": "м2",
+            "qty": 71.6,
+            "price": 100.00
+        },
+        {
+            "name": "Грунтовка борта, ступеней",
+            "unit": "м/п",
+            "qty": 40,
+            "price": 100.00
+        },
+        {
+            "name": "Монтаж бортового камня на борт бассейна",
+            "unit": "м/п",
+            "qty": 26,
+            "price": 2500.00
+        },
+        {
+            "name": "Разгрузка и подноска строительных материалов",
+            "unit": "услуга",
+            "qty": 1,
+            "price": 30000.00
+        }
+    ]
+    
+    # Расчет общей стоимости работ
+    works_total = sum(item["qty"] * item["price"] for item in works_items)
+    
+    return {
+        "equipment_items": equipment_items,
+        "equipment_total": equipment_total,
+        "materials_items": materials_items,
+        "materials_total": materials_total,
+        "works_items": works_items,
+        "works_total": works_total
+    }
+
+def num2text(num):
+    """Конвертация числа в текстовый формат"""
+    units = (
+        'ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть',
+        'семь', 'восемь', 'девять'
+    )
+    teens = (
+        'десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать',
+        'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать'
+    )
+    tens = (
+        'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят',
+        'семьдесят', 'восемьдесят', 'девяносто'
+    )
+    hundreds = (
+        'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот',
+        'семьсот', 'восемьсот', 'девятьсот'
+    )
+    
+    def _convert_group(num):
+        s = ''
+        if num >= 100:
+            s += hundreds[num // 100 - 1] + ' '
+            num %= 100
+        
+        if num >= 20:
+            s += tens[num // 10 - 2] + ' '
+            num %= 10
+        
+        if num >= 10:
+            s += teens[num - 10] + ' '
+        elif num > 0:
+            s += units[num] + ' '
+            
+        return s.strip()
+    
+    if num == 0:
+        return 'ноль рублей ноль копеек'
+    
+    # Разделяем целую и дробную части
+    rub, kop = divmod(round(num * 100), 100)
+    
+    # Обрабатываем рубли
+    text = ''
+    if rub > 0:
+        for unit_index, unit_name in enumerate(('', 'тысяч', 'миллион', 'миллиард')):
+            _num = rub % 1000
+            if _num > 0:
+                group_text = _convert_group(_num)
+                if unit_index > 0:
+                    if _num % 10 == 1 and _num % 100 != 11:
+                        unit_text = unit_name + 'а'
+                    elif 2 <= _num % 10 <= 4 and (_num % 100 < 10 or _num % 100 >= 20):
+                        unit_text = unit_name + 'и'
+                    else:
+                        unit_text = unit_name
+                    text = group_text + ' ' + unit_text + ' ' + text
+                else:
+                    text = group_text + ' ' + text
+            rub //= 1000
+        
+        # Добавляем слово "рублей" с правильным окончанием
+        if rub % 10 == 1 and rub % 100 != 11:
+            text += 'рубль'
+        elif 2 <= rub % 10 <= 4 and (rub % 100 < 10 or rub % 100 >= 20):
+            text += 'рубля'
+        else:
+            text += 'рублей'
+    
+    # Добавляем копейки
+    if kop > 0:
+        text += ' ' + str(kop) + ' копеек'
+    else:
+        text += ' ноль копеек'
+    
+    return text.capitalize()
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -821,6 +1353,116 @@ def compare_estimate():
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 400
+
+@app.route('/generate_kp', methods=['POST'])
+def generate_kp():
+    """Генерация коммерческого предложения в формате ООО "ДОН БАСС" """
+    try:
+        data = request.json
+        
+        # Получаем основные параметры бассейна
+        length = data.get('length', 0)
+        width = data.get('width', 0)
+        depth = data.get('depth', 0)
+        wall_thickness = data.get('wall_thickness', 0)
+        pool_type = data.get('pool_type', 'liner')
+        
+        # Данные заказчика
+        customer_data = data.get('customer', {})
+        
+        # Текущая дата для КП
+        from datetime import datetime
+        today = datetime.now()
+        
+        # Базовые расчеты
+        basic_dimensions = calculate_basic_dimensions(length, width, depth, wall_thickness)
+        
+        # Получаем данные для КП в формате ООО "ДОН БАСС"
+        kp_items = calculate_kp_items(length, width, depth, pool_type)
+        
+        # Преобразуем строковые значения в числовые
+        dimensions = {}
+        for key, value in basic_dimensions.items():
+            parts = value.split()
+            if len(parts) > 0:
+                dimensions[key] = float(parts[0])
+        
+        # Подсчет общей суммы
+        total_amount = kp_items["equipment_total"] + kp_items["materials_total"] + kp_items["works_total"]
+        
+        # Преобразование суммы в текстовый формат
+        equipment_text = num2text(kp_items["equipment_total"])
+        materials_text = num2text(kp_items["materials_total"])
+        works_text = num2text(kp_items["works_total"])
+        total_text = num2text(total_amount)
+        
+        # Формируем КП в формате ДОН БАСС
+        kp_data = {
+            "company": {
+                "name": "Компания ООО \"ДОН БАСС\"",
+                "email": "ooo.donbass61@mail.ru",
+                "website": "https://ooodonbass.ru/",
+                "phone": "+7(938) 158-11-11"
+            },
+            "date": {
+                "day": today.strftime("%d"),
+                "month": today.strftime("%m"),
+                "year": today.strftime("%Y")
+            },
+            "customer": {
+                "name": customer_data.get('name', 'Владимир'),
+                "phone": customer_data.get('phone', '8(928) 118-67-27'),
+                "address": customer_data.get('address', 'Таганрог'),
+                "location": customer_data.get('location', 'Улица')
+            },
+            "pool": {
+                "length": length,
+                "width": width,
+                "depth": depth,
+                "type": "Скиммерный",
+                "finish": "Лайнер" if pool_type == "liner" else "Плитка" if pool_type == "tile" else "Мозаика",
+                "shape": "Прямоугольный",
+                "category": "Частный",
+                "water_surface": dimensions.get("Площадь водной поверхности", 0),
+                "perimeter": dimensions.get("Периметр", 0),
+                "wall_area": dimensions.get("Площадь стен", 0),
+                "finishing_area": dimensions.get("Площадь под отделку", 0),
+                "water_volume": dimensions.get("Объем воды", 0) * 1000  # конвертируем в литры
+            },
+            "equipment": {
+                "items": kp_items["equipment_items"],
+                "total": kp_items["equipment_total"],
+                "total_text": equipment_text,
+                "count": len(kp_items["equipment_items"])
+            },
+            "materials": {
+                "items": kp_items["materials_items"],
+                "total": kp_items["materials_total"],
+                "total_text": materials_text,
+                "count": len(kp_items["materials_items"])
+            },
+            "works": {
+                "items": kp_items["works_items"],
+                "total": kp_items["works_total"],
+                "total_text": works_text,
+                "count": len(kp_items["works_items"])
+            },
+            "total": total_amount,
+            "total_text": total_text
+        }
+        
+        return jsonify({
+            "success": True,
+            "kp_data": kp_data
+        })
+        
+    except Exception as e:
+        error_details = traceback.format_exc()
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": error_details
         }), 400
 
 if __name__ == '__main__':

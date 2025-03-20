@@ -45,6 +45,126 @@
             padding-top: 10px;
             margin-top: 10px;
         }
+        
+        /* Стили для коммерческого предложения */
+        #kp-container {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+        #kp-container .card {
+            border: none;
+            box-shadow: none;
+        }
+        
+        #kp-content {
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #dee2e6;
+        }
+        
+        #kp-container h3, 
+        #kp-container h4, 
+        #kp-container h5 {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        #kp-container .table {
+            border: 1px solid #000;
+        }
+        
+        #kp-container .table th,
+        #kp-container .table td {
+            border: 1px solid #000;
+            padding: 8px;
+            vertical-align: middle;
+        }
+        
+        #kp-container .table th {
+            background-color: #f5f5f5;
+        }
+        
+        #kp-equipment-text,
+        #kp-materials-text,
+        #kp-works-text,
+        #kp-grand-total-text {
+            white-space: pre-line;
+            font-style: italic;
+        }
+        
+        /* Стили для печати */
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
+            }
+            .container {
+                max-width: 100%;
+                width: 100%;
+            }
+            .card {
+                box-shadow: none;
+                border: none;
+            }
+            .card-body {
+                padding: 0;
+            }
+            #poolForm, 
+            #results, 
+            #errorMessage, 
+            #compare-section,
+            #comparison-result,
+            #kp-print-btn,
+            #kp-back-btn {
+                display: none !important;
+            }
+            #kp-container {
+                display: block !important;
+            }
+            .hidden {
+                display: block !important;
+            }
+            .table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .table th, .table td {
+                border: 1px solid #000;
+            }
+            h3, h4, h5 {
+                margin-top: 20px;
+            }
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+            
+            #kp-content {
+                padding: 0;
+                border: none;
+            }
+            
+            #kp-container .table th,
+            #kp-container .table td {
+                padding: 5px;
+            }
+            
+            #kp-container h3 {
+                font-size: 18pt;
+            }
+            
+            #kp-container h4 {
+                font-size: 16pt;
+            }
+            
+            #kp-container h5 {
+                font-size: 14pt;
+            }
+            
+            #kp-container .card {
+                margin-bottom: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -85,9 +205,46 @@
                     </div>
                     
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Рассчитать</button>
+                        <button type="submit" class="btn btn-primary me-2">Рассчитать</button>
+                        <button type="button" id="generateKpBtn" class="btn btn-secondary">Сгенерировать КП</button>
                     </div>
                 </form>
+            </div>
+        </div>
+        
+        <!-- Форма для ввода данных заказчика перед генерацией КП -->
+        <div id="customer-data-form" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Данные заказчика</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="customerForm">
+                            <div class="mb-3">
+                                <label for="customer-name" class="form-label">Имя заказчика</label>
+                                <input type="text" class="form-control" id="customer-name" value="Владимир">
+                            </div>
+                            <div class="mb-3">
+                                <label for="customer-phone" class="form-label">Телефон</label>
+                                <input type="text" class="form-control" id="customer-phone" value="8(928) 118-67-27">
+                            </div>
+                            <div class="mb-3">
+                                <label for="customer-address" class="form-label">Адрес объекта</label>
+                                <input type="text" class="form-control" id="customer-address" value="Таганрог">
+                            </div>
+                            <div class="mb-3">
+                                <label for="customer-location" class="form-label">Место размещения</label>
+                                <input type="text" class="form-control" id="customer-location" value="Улица">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="generate-kp-submit">Сгенерировать КП</button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -300,6 +457,177 @@
                                 <!-- Сюда будут добавлены данные через JavaScript -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Коммерческое предложение в формате ООО "ДОН БАСС" -->
+        <div id="kp-container" class="result-section hidden mt-5 mb-5">
+            <div class="card">
+                <div class="card-body">
+                    <div id="kp-content">
+                        <div class="text-center mb-4">
+                            <h3 id="kp-company-name">Компания ООО "ДОН БАСС"</h3>
+                            <p id="kp-company-email">ooo.donbass61@mail.ru</p>
+                            <p id="kp-company-website">https://ooodonbass.ru/</p>
+                            <p id="kp-company-phone">tel:+7(938) 158-11-11</p>
+                            
+                            <div class="my-4">
+                                <img src="https://ooodonbass.ru/wp-content/uploads/2019/09/logo-1.svg" alt="ДОН БАСС" style="max-width: 200px;">
+                            </div>
+                            
+                            <h4>Коммерческое предложение от <span id="kp-date">04.02.2025</span> года</h4>
+                        </div>
+                        
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td width="33%">Заказчик:</td>
+                                    <td id="kp-customer-name" width="33%">Владимир</td>
+                                    <td width="34%">Размеры:</td>
+                                </tr>
+                                <tr>
+                                    <td>Телефон:</td>
+                                    <td id="kp-customer-phone">8(928) 118-67-27</td>
+                                    <td>Длина:</td>
+                                </tr>
+                                <tr>
+                                    <td>Адрес объекта:</td>
+                                    <td id="kp-customer-address">Таганрог</td>
+                                    <td>Ширина:</td>
+                                </tr>
+                                <tr>
+                                    <td>Место размещения:</td>
+                                    <td id="kp-customer-location">Улица</td>
+                                    <td>Глубина,1:</td>
+                                </tr>
+                                <tr>
+                                    <td>Тип бассейна:</td>
+                                    <td id="kp-pool-type">Скиммерный</td>
+                                    <td>Глубина,2:</td>
+                                </tr>
+                                <tr>
+                                    <td>Отделка чаши:</td>
+                                    <td id="kp-pool-finish">Лайнер</td>
+                                    <td>Глубина (ср):</td>
+                                </tr>
+                                <tr>
+                                    <td>Форма:</td>
+                                    <td id="kp-pool-shape">Прямоугольный</td>
+                                    <td>V (объем):</td>
+                                </tr>
+                                <tr>
+                                    <td>Категория:</td>
+                                    <td id="kp-pool-category">Частный</td>
+                                    <td>Р (периметр):</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td>S (зеркало):</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td>S (стен):</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td>S (под отделку):</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <h5 class="text-center mb-3">Основное оборудование</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>№</th>
+                                        <th>Наименование</th>
+                                        <th>Ед.изм</th>
+                                        <th>Кол-во</th>
+                                        <th>Цена</th>
+                                        <th>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kp-equipment-items">
+                                    <!-- Будет заполнено JavaScript -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                        <td id="kp-equipment-total" class="fw-bold"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <p id="kp-equipment-text" class="mb-4 text-center"></p>
+                        
+                        <h5 class="text-center mb-3">Материал и расходы для выполнения работ</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>№</th>
+                                        <th>Наименование</th>
+                                        <th>Ед.изм</th>
+                                        <th>Кол-во</th>
+                                        <th>Цена</th>
+                                        <th>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kp-materials-items">
+                                    <!-- Будет заполнено JavaScript -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                        <td id="kp-materials-total" class="fw-bold"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <p id="kp-materials-text" class="mb-4 text-center"></p>
+                        
+                        <h5 class="text-center mb-3">Основные работы</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>№</th>
+                                        <th>Наименование</th>
+                                        <th>Ед.изм</th>
+                                        <th>Кол-во</th>
+                                        <th>Цена</th>
+                                        <th>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kp-works-items">
+                                    <!-- Будет заполнено JavaScript -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end fw-bold">Итого:</td>
+                                        <td id="kp-works-total" class="fw-bold"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <p id="kp-works-text" class="mb-4 text-center"></p>
+                        
+                        <h5 class="text-center mb-3">Итого по 3 позициям:</h5>
+                        <div class="text-center mb-5">
+                            <h4 id="kp-grand-total" class="fw-bold"></h4>
+                            <p id="kp-grand-total-text" class="fw-bold"></p>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button id="kp-print-btn" class="btn btn-primary">Печать КП</button>
+                            <button id="kp-back-btn" class="btn btn-secondary ms-2">Вернуться</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -567,6 +895,197 @@
             function formatNumber(num) {
                 return parseFloat(num).toLocaleString('ru-RU');
             }
+        });
+
+        // Код для генерации КП в формате ООО "ДОН БАСС"
+        document.getElementById('generateKpBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Показываем модальное окно для ввода данных заказчика
+            const customerModal = new bootstrap.Modal(document.getElementById('customer-data-form'));
+            customerModal.show();
+        });
+        
+        // Обработчик для кнопки в модальном окне
+        document.getElementById('generate-kp-submit').addEventListener('click', function() {
+            // Получаем данные заказчика из формы
+            const customerData = {
+                name: document.getElementById('customer-name').value,
+                phone: document.getElementById('customer-phone').value,
+                address: document.getElementById('customer-address').value,
+                location: document.getElementById('customer-location').value
+            };
+            
+            // Получаем параметры бассейна из основной формы
+            const formData = {
+                length: parseInt(document.getElementById('length').value),
+                width: parseInt(document.getElementById('width').value),
+                depth: parseInt(document.getElementById('depth').value),
+                wall_thickness: parseInt(document.getElementById('wall_thickness').value),
+                pool_type: document.getElementById('pool_type').value,
+                customer: customerData
+            };
+            
+            // Закрываем модальное окно
+            const customerModal = bootstrap.Modal.getInstance(document.getElementById('customer-data-form'));
+            customerModal.hide();
+            
+            // Отправляем запрос на сервер
+            fetch('/generate_kp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Произошла ошибка при генерации КП');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    displayKP(data.kp_data);
+                    document.getElementById('kp-container').classList.remove('hidden');
+                    document.getElementById('results').classList.add('hidden');
+                    document.getElementById('errorMessage').classList.add('hidden');
+                    
+                    // Прокручиваем страницу к КП
+                    window.scrollTo({
+                        top: document.getElementById('kp-container').offsetTop,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    throw new Error(data.error || 'Произошла ошибка при генерации КП');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').textContent = error.message || 'Произошла ошибка при генерации КП. Пожалуйста, попробуйте еще раз.';
+            });
+        });
+        
+        function displayKP(kpData) {
+            // Форматирование чисел
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(value);
+            };
+            
+            // Заполняем данные компании
+            document.getElementById('kp-company-name').textContent = kpData.company.name;
+            document.getElementById('kp-company-email').textContent = kpData.company.email;
+            document.getElementById('kp-company-website').textContent = kpData.company.website;
+            document.getElementById('kp-company-phone').textContent = kpData.company.phone;
+            
+            // Заполняем дату
+            document.getElementById('kp-date').textContent = `${kpData.date.day}.${kpData.date.month}.${kpData.date.year}`;
+            
+            // Заполняем данные заказчика
+            document.getElementById('kp-customer-name').textContent = kpData.customer.name;
+            document.getElementById('kp-customer-phone').textContent = kpData.customer.phone;
+            document.getElementById('kp-customer-address').textContent = kpData.customer.address;
+            document.getElementById('kp-customer-location').textContent = kpData.customer.location;
+            
+            // Заполняем данные бассейна
+            document.getElementById('kp-pool-type').textContent = kpData.pool.type;
+            document.getElementById('kp-pool-finish').textContent = kpData.pool.finish;
+            document.getElementById('kp-pool-shape').textContent = kpData.pool.shape;
+            document.getElementById('kp-pool-category').textContent = kpData.pool.category;
+            
+            // Обновляем размеры в правой колонке
+            const table = document.querySelector('#kp-container table');
+            table.rows[1].cells[2].textContent = `Длина: ${kpData.pool.length}`;
+            table.rows[2].cells[2].textContent = `Ширина: ${kpData.pool.width}`;
+            table.rows[3].cells[2].textContent = `Глубина,1: ${kpData.pool.depth}`;
+            table.rows[4].cells[2].textContent = `Глубина,2: ${kpData.pool.depth}`;
+            table.rows[5].cells[2].textContent = `Глубина (ср): ${kpData.pool.depth}`;
+            table.rows[6].cells[2].textContent = `V (объем): ${formatCurrency(kpData.pool.water_volume)} л`;
+            table.rows[7].cells[2].textContent = `Р (периметр): ${formatCurrency(kpData.pool.perimeter)} м/п`;
+            table.rows[8].cells[2].textContent = `S (зеркало): ${formatCurrency(kpData.pool.water_surface)} м²`;
+            table.rows[9].cells[2].textContent = `S (стен): ${formatCurrency(kpData.pool.wall_area)} м²`;
+            table.rows[10].cells[2].textContent = `S (под отделку): ${formatCurrency(kpData.pool.finishing_area)} м²`;
+            
+            // Заполняем таблицу оборудования
+            let equipmentHtml = '';
+            kpData.equipment.items.forEach((item, index) => {
+                equipmentHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(item.qty * item.price)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('kp-equipment-items').innerHTML = equipmentHtml;
+            document.getElementById('kp-equipment-total').textContent = formatCurrency(kpData.equipment.total);
+            
+            // Формируем текст под таблицей оборудования
+            document.getElementById('kp-equipment-text').textContent = `Всего наименований ${kpData.equipment.count}, на сумму ${formatCurrency(kpData.equipment.total)} рублей`;
+            document.getElementById('kp-equipment-text').textContent += `\n${kpData.equipment.total_text}`;
+            
+            // Заполняем таблицу материалов
+            let materialsHtml = '';
+            kpData.materials.items.forEach((item, index) => {
+                materialsHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(item.qty * item.price)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('kp-materials-items').innerHTML = materialsHtml;
+            document.getElementById('kp-materials-total').textContent = formatCurrency(kpData.materials.total);
+            
+            // Формируем текст под таблицей материалов
+            document.getElementById('kp-materials-text').textContent = `Всего наименований ${kpData.materials.count}, на сумму ${formatCurrency(kpData.materials.total)} рублей`;
+            document.getElementById('kp-materials-text').textContent += `\n${kpData.materials.total_text}`;
+            
+            // Заполняем таблицу работ
+            let worksHtml = '';
+            kpData.works.items.forEach((item, index) => {
+                worksHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(item.qty * item.price)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('kp-works-items').innerHTML = worksHtml;
+            document.getElementById('kp-works-total').textContent = formatCurrency(kpData.works.total);
+            
+            // Формируем текст под таблицей работ
+            document.getElementById('kp-works-text').textContent = `Всего наименований ${kpData.works.count}, на сумму ${formatCurrency(kpData.works.total)} рублей`;
+            document.getElementById('kp-works-text').textContent += `\n${kpData.works.total_text}`;
+            
+            // Итоговая сумма
+            document.getElementById('kp-grand-total').textContent = `${formatCurrency(kpData.total)} рублей`;
+            document.getElementById('kp-grand-total-text').textContent = kpData.total_text;
+        }
+        
+        // Печать КП
+        document.getElementById('kp-print-btn').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Кнопка возврата
+        document.getElementById('kp-back-btn').addEventListener('click', function() {
+            document.getElementById('kp-container').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
         });
     </script>
 </body>
