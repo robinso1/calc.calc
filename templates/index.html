@@ -173,40 +173,51 @@
         
         <div class="card">
             <div class="card-body">
+                <h5 class="card-title">Параметры бассейна</h5>
                 <form id="poolForm">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label for="length" class="form-label">Длина (мм):</label>
-                            <input type="number" class="form-control" id="length" name="length" min="1000" max="20000" value="8000" required>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="length" class="form-label">Длина (мм)</label>
+                                <input type="number" class="form-control" id="length" required min="0" step="100">
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label for="width" class="form-label">Ширина (мм):</label>
-                            <input type="number" class="form-control" id="width" name="width" min="1000" max="20000" value="4000" required>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="width" class="form-label">Ширина (мм)</label>
+                                <input type="number" class="form-control" id="width" required min="0" step="100">
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label for="depth" class="form-label">Глубина (мм):</label>
-                            <input type="number" class="form-control" id="depth" name="depth" min="1000" max="3000" value="1500" required>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="depth" class="form-label">Глубина (мм)</label>
+                                <input type="number" class="form-control" id="depth" required min="0" step="100">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="wall_thickness" class="form-label">Толщина стенки (мм):</label>
-                            <input type="number" class="form-control" id="wall_thickness" name="wall_thickness" min="150" max="300" value="200" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="pool_type" class="form-label">Тип бассейна:</label>
-                            <select class="form-select" id="pool_type" name="pool_type">
-                                <option value="liner">Лайнер</option>
-                                <option value="tile">Плитка</option>
-                                <option value="mosaic">Мозаика</option>
-                            </select>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="wall_thickness" class="form-label">Толщина стен (мм)</label>
+                                <input type="number" class="form-control" id="wall_thickness" required min="0" step="10">
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary me-2">Рассчитать</button>
-                        <button type="button" id="generateKpBtn" class="btn btn-secondary">Сгенерировать КП</button>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="profile" class="form-label">Профиль КП</label>
+                                <select class="form-select" id="profile" required>
+                                    <option value="kp1">КП №1 (8000x4000x1500)</option>
+                                    <option value="kp2">КП №2 (8000x3000x1500)</option>
+                                    <option value="kp3">КП №3 (8000x3000x1500) - Упрощенный</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">Рассчитать</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -644,124 +655,173 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.getElementById('poolForm').addEventListener('submit', function(e) {
+        document.getElementById('poolForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = {
-                length: parseInt(document.getElementById('length').value),
-                width: parseInt(document.getElementById('width').value),
-                depth: parseInt(document.getElementById('depth').value),
-                wall_thickness: parseInt(document.getElementById('wall_thickness').value),
-                pool_type: document.getElementById('pool_type').value
+            const data = {
+                length: parseFloat(document.getElementById('length').value),
+                width: parseFloat(document.getElementById('width').value),
+                depth: parseFloat(document.getElementById('depth').value),
+                wall_thickness: parseFloat(document.getElementById('wall_thickness').value),
+                profile_id: document.getElementById('profile').value
             };
             
-            fetch('/calculate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.error || 'Произошла ошибка при расчете');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                displayResults(data);
-                document.getElementById('results').classList.remove('hidden');
-                document.getElementById('errorMessage').classList.add('hidden');
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('errorMessage').classList.remove('hidden');
-                document.getElementById('errorText').textContent = error.message || 'Произошла ошибка при расчете. Пожалуйста, попробуйте еще раз.';
-            });
-        });
-        
-        function displayResults(data) {
-            // Форматирование чисел
-            const formatCurrency = (value) => {
-                return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
-            };
-            
-            // Основные размеры
-            const basicDimensionsHtml = Object.entries(data.basic_dimensions)
-                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
-                .join('');
-            document.getElementById('basicDimensions').innerHTML = basicDimensionsHtml;
-            
-            // Земляные работы
-            const earthworksHtml = Object.entries(data.earthworks)
-                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
-                .join('');
-            document.getElementById('earthworks').innerHTML = earthworksHtml;
-            
-            // Бетонные работы
-            const concreteHtml = Object.entries(data.concrete_works)
-                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
-                .join('');
-            document.getElementById('concrete').innerHTML = concreteHtml;
-            
-            // Опалубка и армирование
-            const formworkHtml = Object.entries(data.formwork)
-                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
-                .join('');
-            document.getElementById('formwork').innerHTML = formworkHtml;
-            
-            // Отделочные работы
-            let finishingHtml = `
-                <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof data.finishing.area === 'number' ? data.finishing.area.toFixed(1) : data.finishing.area} м²</span></div>
-                <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof data.finishing.perimeter === 'number' ? data.finishing.perimeter.toFixed(1) : data.finishing.perimeter} м/п</span></div>
-                <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(data.finishing.material_cost)}</span></div>
-                <div class="cost-item"><span>Стоимость копингового камня:</span> <span>${formatCurrency(data.finishing.coping_stone.total)}</span></div>
-                <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(data.finishing.work_cost)}</span></div>
-                <div class="total-cost"><span>Итого по отделке:</span> <span>${formatCurrency(data.finishing.total_cost)}</span></div>
-            `;
-            document.getElementById('finishing').innerHTML = finishingHtml;
-            
-            // Стоимость материалов
-            let materialsHtml = '';
-            Object.entries(data.costs.materials).forEach(([key, value]) => {
-                materialsHtml += `<div class="cost-item"><span>${key}:</span> <span>${formatCurrency(value)}</span></div>`;
-            });
-            materialsHtml += `<div class="total-cost"><span>Итого по материалам:</span> <span>${formatCurrency(data.costs.materials_total)}</span></div>`;
-            document.getElementById('materialsCost').innerHTML = materialsHtml;
-            
-            // Стоимость работ
-            let worksHtml = '';
-            Object.entries(data.costs.works).forEach(([category, items]) => {
-                worksHtml += `<h6 class="mt-3">${category}:</h6>`;
-                Object.entries(items).forEach(([key, value]) => {
-                    worksHtml += `<div class="cost-item"><span>${key}:</span> <span>${formatCurrency(value)}</span></div>`;
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 });
-                worksHtml += `<div class="cost-item"><span>Итого по ${category.toLowerCase()}:</span> <span>${formatCurrency(data.costs.category_totals[category])}</span></div>`;
-            });
-            worksHtml += `<div class="total-cost"><span>Итого по работам:</span> <span>${formatCurrency(data.costs.works_total)}</span></div>`;
-            document.getElementById('worksCost').innerHTML = worksHtml;
-            
-            // Стоимость оборудования
-            let equipmentHtml = '';
-            Object.entries(data.costs.equipment).forEach(([key, value]) => {
-                equipmentHtml += `<div class="cost-item"><span>${key}:</span> <span>${formatCurrency(value)}</span></div>`;
-            });
-            equipmentHtml += `<div class="total-cost"><span>Итого по оборудованию:</span> <span>${formatCurrency(data.costs.equipment_total)}</span></div>`;
-            document.getElementById('equipmentCost').innerHTML = equipmentHtml;
-            
-            // Итоговая стоимость
-            const totalCostHtml = `
-                <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(data.costs.materials_total)}</span></div>
-                <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(data.costs.works_total)}</span></div>
-                <div class="cost-item"><span>Стоимость оборудования:</span> <span>${formatCurrency(data.costs.equipment_total)}</span></div>
-                <div class="cost-item"><span>Стоимость отделки:</span> <span>${formatCurrency(data.costs.finishing_total)}</span></div>
-                <div class="total-cost"><span>ИТОГО:</span> <span>${formatCurrency(data.costs.total)}</span></div>
-            `;
-            document.getElementById('totalCost').innerHTML = totalCostHtml;
-        }
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert(result.error);
+                    return;
+                }
+                
+                // Отображаем результаты
+                document.getElementById('results').style.display = 'block';
+                
+                // Основные размеры
+                const basicDims = result.basic_dimensions;
+                document.getElementById('basicDimensions').innerHTML = Object.entries(basicDims)
+                    .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                    .join('');
+                
+                // Стоимость материалов
+                const materialsCost = result.materials_cost;
+                document.getElementById('materialsCost').innerHTML = `
+                    <div class="mb-3">
+                        ${Object.entries(materialsCost.materials)
+                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                            .join('')}
+                    </div>
+                    <p><strong>Итого по материалам:</strong> ${materialsCost.total_cost}</p>
+                `;
+                
+                // Стоимость работ
+                const worksCost = result.works_cost;
+                document.getElementById('worksCost').innerHTML = `
+                    <div class="mb-3">
+                        ${Object.entries(worksCost.works)
+                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                            .join('')}
+                    </div>
+                    <p><strong>Итого по работам:</strong> ${worksCost.total_cost}</p>
+                `;
+                
+                // Стоимость отделочных работ
+                const finishingCost = result.finishing_cost;
+                document.getElementById('finishing').innerHTML = `
+                    <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof finishingCost.area === 'number' ? finishingCost.area.toFixed(1) : finishingCost.area} м²</span></div>
+                    <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof finishingCost.perimeter === 'number' ? finishingCost.perimeter.toFixed(1) : finishingCost.perimeter} м/п</span></div>
+                    <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(finishingCost.material_cost)}</span></div>
+                    <div class="cost-item"><span>Стоимость копингового камня:</span> <span>${formatCurrency(finishingCost.coping_stone.total)}</span></div>
+                    <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(finishingCost.work_cost)}</span></div>
+                    <div class="total-cost"><span>Итого по отделочным работам:</span> <span>${formatCurrency(finishingCost.total_cost)}</span></div>
+                `;
+                
+                // Общая стоимость
+                document.getElementById('totalCost').innerHTML = `
+                    <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(materialsCost.total_cost)}</span></div>
+                    <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(worksCost.total_cost)}</span></div>
+                    <div class="cost-item"><span>Стоимость отделочных работ:</span> <span>${formatCurrency(finishingCost.total_cost)}</span></div>
+                    <div class="total-cost"><span>ИТОГО:</span> <span>${formatCurrency(result.total_cost)}</span></div>
+                `;
+                
+                // Профиль КП
+                document.getElementById('kp-pool-type').textContent = result.profile;
+                document.getElementById('kp-pool-finish').textContent = result.pool.finish;
+                document.getElementById('kp-pool-shape').textContent = result.pool.shape;
+                document.getElementById('kp-pool-category').textContent = result.pool.category;
+                
+                // Обновляем размеры в правой колонке
+                const table = document.querySelector('#kp-container table');
+                table.rows[1].cells[2].textContent = `Длина: ${result.pool.length}`;
+                table.rows[2].cells[2].textContent = `Ширина: ${result.pool.width}`;
+                table.rows[3].cells[2].textContent = `Глубина,1: ${result.pool.depth}`;
+                table.rows[4].cells[2].textContent = `Глубина,2: ${result.pool.depth}`;
+                table.rows[5].cells[2].textContent = `Глубина (ср): ${result.pool.depth}`;
+                table.rows[6].cells[2].textContent = `V (объем): ${formatCurrency(result.pool.water_volume)} л`;
+                table.rows[7].cells[2].textContent = `Р (периметр): ${formatCurrency(result.pool.perimeter)} м/п`;
+                table.rows[8].cells[2].textContent = `S (зеркало): ${formatCurrency(result.pool.water_surface)} м²`;
+                table.rows[9].cells[2].textContent = `S (стен): ${formatCurrency(result.pool.wall_area)} м²`;
+                table.rows[10].cells[2].textContent = `S (под отделку): ${formatCurrency(result.pool.finishing_area)} м²`;
+                
+                // Заполняем таблицу оборудования
+                let equipmentHtml = '';
+                result.equipment.items.forEach((item, index) => {
+                    equipmentHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.unit}</td>
+                            <td>${item.qty}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(item.qty * item.price)}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('kp-equipment-items').innerHTML = equipmentHtml;
+                document.getElementById('kp-equipment-total').textContent = formatCurrency(result.equipment.total);
+                
+                // Формируем текст под таблицей оборудования
+                document.getElementById('kp-equipment-text').textContent = `Всего наименований ${result.equipment.count}, на сумму ${formatCurrency(result.equipment.total)} рублей`;
+                document.getElementById('kp-equipment-text').textContent += `\n${result.equipment.total_text}`;
+                
+                // Заполняем таблицу материалов
+                let materialsHtml = '';
+                result.materials.items.forEach((item, index) => {
+                    materialsHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.unit}</td>
+                            <td>${item.qty}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(item.qty * item.price)}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('kp-materials-items').innerHTML = materialsHtml;
+                document.getElementById('kp-materials-total').textContent = formatCurrency(result.materials.total);
+                
+                // Формируем текст под таблицей материалов
+                document.getElementById('kp-materials-text').textContent = `Всего наименований ${result.materials.count}, на сумму ${formatCurrency(result.materials.total)} рублей`;
+                document.getElementById('kp-materials-text').textContent += `\n${result.materials.total_text}`;
+                
+                // Заполняем таблицу работ
+                let worksHtml = '';
+                result.works.items.forEach((item, index) => {
+                    worksHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.unit}</td>
+                            <td>${item.qty}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(item.qty * item.price)}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('kp-works-items').innerHTML = worksHtml;
+                document.getElementById('kp-works-total').textContent = formatCurrency(result.works.total);
+                
+                // Формируем текст под таблицей работ
+                document.getElementById('kp-works-text').textContent = `Всего наименований ${result.works.count}, на сумму ${formatCurrency(result.works.total)} рублей`;
+                document.getElementById('kp-works-text').textContent += `\n${result.works.total_text}`;
+                
+                // Итоговая сумма
+                document.getElementById('kp-grand-total').textContent = `${formatCurrency(result.total_cost)} рублей`;
+                document.getElementById('kp-grand-total-text').textContent = result.total_text;
+                
+            } catch (error) {
+                alert('Произошла ошибка при расчете: ' + error.message);
+            }
+        });
 
         $(document).ready(function() {
             // Код для сравнения с КП
@@ -771,7 +831,7 @@
                 const width = parseFloat($("#width").val());
                 const depth = parseFloat($("#depth").val());
                 const wallThickness = parseFloat($("#wall_thickness").val());
-                const poolType = $("#pool_type").val();
+                const poolType = $("#profile").val();
                 
                 // Получаем данные из КП
                 const estimateData = {
@@ -922,7 +982,7 @@
                 width: parseInt(document.getElementById('width').value),
                 depth: parseInt(document.getElementById('depth').value),
                 wall_thickness: parseInt(document.getElementById('wall_thickness').value),
-                pool_type: document.getElementById('pool_type').value,
+                pool_type: document.getElementById('profile').value,
                 customer: customerData
             };
             

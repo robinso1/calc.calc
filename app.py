@@ -3,38 +3,71 @@ import math
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 load_dotenv()
 
-def calculate_basic_dimensions(length, width, depth, wall_thickness):
-    """Расчет основных размеров бассейна"""
-    # Переводим в метры
-    l, w, d = length/1000, width/1000, depth/1000
-    wt = wall_thickness/1000
+def calculate_basic_dimensions(length, width, depth, wall_thickness, profile_id="kp1"):
+    """
+    Расчет основных размеров бассейна с учетом профиля КП
     
-    # Расчет площади водной поверхности
-    water_surface = l * w
+    Args:
+        length (float): Длина бассейна в мм
+        width (float): Ширина бассейна в мм
+        depth (float): Глубина бассейна в мм
+        wall_thickness (float): Толщина стен в мм
+        profile_id (str): Идентификатор профиля КП
+        
+    Returns:
+        dict: Словарь с основными размерами
+    """
+    # Получаем параметры профиля
+    profile = get_profile(profile_id)
     
-    # Расчет периметра
-    perimeter = 2 * (l + w)
+    # Конвертируем размеры в метры
+    length_m = length / 1000
+    width_m = width / 1000
+    depth_m = depth / 1000
+    wall_thickness_m = wall_thickness / 1000
     
-    # Расчет площади стен
-    wall_area = 2 * (l + w) * d
+    # Рассчитываем теоретические размеры
+    theoretical_water_surface = length_m * width_m
+    theoretical_perimeter = 2 * (length_m + width_m)
+    theoretical_wall_area = theoretical_perimeter * depth_m
+    theoretical_finishing_area = theoretical_water_surface + theoretical_wall_area
+    theoretical_water_volume = theoretical_water_surface * depth_m
     
-    # Расчет площади под отделку (дно + стены)
-    finishing_area = water_surface + wall_area
+    # Получаем коэффициенты корректировки
+    correction_factors = get_dimensions_correction_factor(profile_id, {
+        "length": length,
+        "width": width,
+        "depth": depth
+    })
     
-    # Расчет объема воды (90% от геометрического объема)
-    water_volume = water_surface * d * 0.9
+    # Применяем корректировку
+    water_surface = theoretical_water_surface * correction_factors["water_surface"]
+    perimeter = theoretical_perimeter * correction_factors["perimeter"]
+    wall_area = theoretical_wall_area * correction_factors["wall_area"]
+    finishing_area = theoretical_finishing_area * correction_factors["finishing_area"]
+    water_volume = theoretical_water_volume * correction_factors["water_volume"]
     
+    # Рассчитываем объем бетона
+    concrete_volume = (water_surface * wall_thickness_m) + (wall_area * wall_thickness_m)
+    
+    # Рассчитываем объем земляных работ (примерно в 2 раза больше объема бассейна)
+    earth_volume = water_volume * 2
+    
+    # Форматируем вывод
     return {
-        "Площадь водной поверхности": f"{water_surface:.1f} м²",
-        "Периметр": f"{perimeter:.1f} м/п",
+        "Площадь водного зеркала": f"{water_surface:.1f} м²",
+        "Периметр": f"{perimeter:.1f} м",
         "Площадь стен": f"{wall_area:.1f} м²",
         "Площадь под отделку": f"{finishing_area:.1f} м²",
-        "Объем воды": f"{water_volume:.1f} м³"
+        "Объем воды": f"{water_volume:.1f} м³",
+        "Объем бетона": f"{concrete_volume:.1f} м³",
+        "Объем земляных работ": f"{earth_volume:.1f} м³"
     }
 
 def calculate_earthworks(length, width, depth, wall_thickness):
@@ -144,236 +177,138 @@ def calculate_formwork(length, width, depth, wall_thickness):
         "Вес арматуры": f"{rebar_weight:.0f} кг"
     }
 
-def calculate_finishing_works(length, width, depth, pool_type):
-    """Расчет отделочных работ"""
-    # Переводим в метры
-    l, w, d = length/1000, width/1000, depth/1000
+def calculate_finishing_cost(basic_dims, profile_id="kp1"):
+    """
+    Расчет стоимости отделочных работ с учетом профиля КП
     
-    # Расчет площади отделки (внутренняя поверхность бассейна)
-    # Площадь дна
-    bottom_area = l * w
+    Args:
+        basic_dims (dict): Словарь с основными размерами
+        profile_id (str): Идентификатор профиля КП
+        
+    Returns:
+        dict: Словарь с расчетами стоимости отделочных работ
+    """
+    # Получаем параметры профиля
+    profile = get_profile(profile_id)
     
-    # Площадь стен
-    wall_area = 2 * (l + w) * d
+    # Получаем числовые значения из строк
+    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
     
-    # Общая площадь отделки
-    finishing_area = bottom_area + wall_area
+    # Получаем цены из профиля
+    prices = profile["materials_prices"]
+    works_prices = profile["works_prices"]
     
-    # Расчет длины периметра для копингового камня
-    perimeter = 2 * (l + w)
+    # Расчет стоимости материалов
+    materials_cost = {
+        "Плитка": finishing_area * prices["tile"],
+        "Затирка": finishing_area * prices["grout"],
+        "Клей для плитки": finishing_area * prices["tile_adhesive"],
+        "Гидроизоляция": finishing_area * prices["waterproofing"]
+    }
     
-    # Стоимость материалов в зависимости от типа бассейна
-    material_cost = 0
-    material_details = {}
+    # Расчет стоимости работ
+    works_cost = {
+        "Укладка плитки": finishing_area * works_prices["tile_laying"],
+        "Затирка швов": finishing_area * works_prices["grouting"]
+    }
     
-    if pool_type == 'liner':
-        # Стоимость лайнера
-        liner_cost = 1500.00 * finishing_area  # Цена за м²
-        material_cost = liner_cost
-        material_details = {
-            "Лайнер": liner_cost
-        }
-    elif pool_type == 'mosaic':
-        # Стоимость мозаики
-        mosaic_cost = 5000.00 * finishing_area  # Цена за м²
-        material_cost = mosaic_cost
-        material_details = {
-            "Мозаика": mosaic_cost
-        }
-    elif pool_type == 'tile':
-        # Стоимость плитки
-        tile_cost = 3000.00 * finishing_area  # Цена за м²
-        material_cost = tile_cost
-        material_details = {
-            "Плитка": tile_cost
-        }
+    # Общая стоимость
+    total_cost = sum(materials_cost.values()) + sum(works_cost.values())
     
-    # Стоимость копингового камня
-    coping_stone_price = 3500.00  # Цена за м.п.
-    coping_stone_cost = coping_stone_price * perimeter
-    
-    # Стоимость работ по отделке
-    work_cost = 2000.00 * finishing_area  # Цена за м²
-    
-    # Общая стоимость отделки
-    total_cost = material_cost + coping_stone_cost + work_cost
-    
+    # Форматируем вывод
     return {
-        "area": finishing_area,  # Возвращаем числовое значение
-        "perimeter": perimeter,  # Возвращаем числовое значение
-        "material_cost": material_cost,
-        "material_details": material_details,
-        "coping_stone": {
-            "length": perimeter,
-            "price": coping_stone_price,
-            "total": coping_stone_cost
-        },
-        "work_cost": work_cost,
-        "total_cost": total_cost
+        "materials": {k: f"{v:,.0f} руб." for k, v in materials_cost.items()},
+        "works": {k: f"{v:,.0f} руб." for k, v in works_cost.items()},
+        "total_cost": f"{total_cost:,.0f} руб."
     }
 
-def calculate_materials_cost(concrete_m200_volume, concrete_m300_volume, gravel_volume, rebar_weight, plywood_sheets, pool_type, finishing_area):
-    """Расчет стоимости материалов"""
-    # Стоимость материалов
-    materials = {
-        "Бетон М200": 5000.00 * concrete_m200_volume,  # Цена за м³
-        "Бетон М300": 6000.00 * concrete_m300_volume,  # Цена за м³
-        "Щебень": 1800.00 * gravel_volume,  # Цена за м³
-        "Арматура": 65.00 * rebar_weight,  # Цена за кг
-        "Фанера": 1800.00 * plywood_sheets,  # Цена за лист
-        "Гидроизоляция": 1200.00 * finishing_area,  # Цена за м²
+def calculate_materials_cost(basic_dims, wall_thickness, profile_id="kp1"):
+    """
+    Расчет стоимости материалов с учетом профиля КП
+    
+    Args:
+        basic_dims (dict): Словарь с основными размерами
+        wall_thickness (float): Толщина стен в мм
+        profile_id (str): Идентификатор профиля КП
+        
+    Returns:
+        dict: Словарь с расчетами стоимости материалов
+    """
+    # Получаем параметры профиля
+    profile = get_profile(profile_id)
+    
+    # Получаем числовые значения из строк
+    water_surface = float(basic_dims["Площадь водного зеркала"].split()[0])
+    wall_area = float(basic_dims["Площадь стен"].split()[0])
+    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+    concrete_volume = float(basic_dims["Объем бетона"].split()[0])
+    
+    # Получаем цены из профиля
+    prices = profile["materials_prices"]
+    
+    # Расчет стоимости материалов
+    materials_cost = {
+        "Бетон": concrete_volume * prices["concrete"],
+        "Арматура": concrete_volume * 0.1 * prices["rebar"],  # Примерно 10% от объема бетона
+        "ПВХ пленка": water_surface * prices["pvc_film"],
+        "Плитка": finishing_area * prices["tile"],
+        "Затирка": finishing_area * prices["grout"],
+        "Гидроизоляция": finishing_area * prices["waterproofing"],
+        "Клей для плитки": finishing_area * prices["tile_adhesive"]
     }
     
-    # Стоимость оборудования
-    equipment = {}
+    # Общая стоимость материалов
+    total_cost = sum(materials_cost.values())
     
-    if pool_type == 'skimmer':
-        equipment = {
-            "Скиммер": 15000.00,
-            "Форсунки": 4 * 3000.00,
-            "Донный слив": 5000.00,
-            "Прожектор": 12000.00,
-            "Закладные": 10000.00
-        }
-    elif pool_type == 'overflow':
-        equipment = {
-            "Переливная решетка": 4500.00 * (finishing_area / 3),  # Примерная оценка длины переливной решетки
-            "Форсунки": 6 * 3000.00,
-            "Донный слив": 5000.00,
-            "Прожектор": 12000.00,
-            "Закладные": 15000.00
-        }
-    elif pool_type == 'liner':
-        equipment = {
-            "Скиммер": 15000.00,
-            "Форсунки": 4 * 3000.00,
-            "Донный слив": 5000.00,
-            "Прожектор": 12000.00,
-            "Закладные": 10000.00
-        }
-    elif pool_type == 'tile' or pool_type == 'mosaic':
-        equipment = {
-            "Скиммер": 15000.00,
-            "Форсунки": 4 * 3000.00,
-            "Донный слив": 5000.00,
-            "Прожектор": 12000.00,
-            "Закладные": 10000.00
-        }
-    
-    # Общая стоимость материалов и оборудования
-    total_materials = sum(materials.values())
-    total_equipment = sum(equipment.values())
-    
+    # Форматируем вывод
     return {
-        "materials": materials,
-        "equipment": equipment,
-        "total_materials": total_materials,
-        "total_equipment": total_equipment,
-        "total": total_materials + total_equipment
+        "materials": {k: f"{v:,.0f} руб." for k, v in materials_cost.items()},
+        "total_cost": f"{total_cost:,.0f} руб."
     }
 
-def calculate_works_cost(earthworks, concrete_works, formwork, finishing_area):
-    """Расчет стоимости работ"""
-    try:
-        # Получаем значения из расчетов
-        try:
-            pit_volume = float(earthworks["Объем котлована"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге объема котлована: {e}")
-            pit_volume = 0
-            
-        try:
-            backfill_volume = float(earthworks["Объем обратной засыпки"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге объема обратной засыпки: {e}")
-            backfill_volume = 0
-            
-        try:
-            trucks = int(earthworks["Количество КамАЗов"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге количества КамАЗов: {e}")
-            trucks = 0
+def calculate_works_cost(basic_dims, wall_thickness, profile_id="kp1"):
+    """
+    Расчет стоимости работ с учетом профиля КП
+    
+    Args:
+        basic_dims (dict): Словарь с основными размерами
+        wall_thickness (float): Толщина стен в мм
+        profile_id (str): Идентификатор профиля КП
         
-        try:
-            concrete_m200_volume = float(concrete_works["Бетон M200 (подбетонка)"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге объема бетона M200: {e}")
-            concrete_m200_volume = 0
-            
-        try:
-            concrete_m300_volume = float(concrete_works["Бетон М300 (чаша)"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге объема бетона М300: {e}")
-            concrete_m300_volume = 0
-            
-        try:
-            gravel_volume = float(concrete_works["Щебень"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге объема щебня: {e}")
-            gravel_volume = 0
-        
-        try:
-            formwork_area = float(formwork["Площадь опалубки"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при парсинге площади опалубки: {e}")
-            formwork_area = 0
-        
-        # Стоимость работ
-        works = {
-            "Земляные работы": {
-                "Выемка грунта": 400.00 * pit_volume,  # Цена за м³
-                "Обратная засыпка": 300.00 * backfill_volume,  # Цена за м³
-                "Вывоз грунта": 6500.00 * trucks  # Цена за КамАЗ
-            },
-            "Бетонные работы": {
-                "Бетонирование подбетонки": 800.00 * concrete_m200_volume,  # Цена за м³
-                "Бетонирование чаши": 1200.00 * concrete_m300_volume,  # Цена за м³
-                "Укладка щебня": 500.00 * gravel_volume  # Цена за м³
-            },
-            "Опалубка и армирование": {
-                "Монтаж опалубки": 600.00 * formwork_area,  # Цена за м²
-                "Армирование": 25000.00  # Фиксированная стоимость
-            },
-            "Отделочные работы": {
-                "Гидроизоляция": 800.00 * finishing_area,  # Цена за м²
-                "Финишная отделка": 1500.00 * finishing_area  # Цена за м²
-            }
-        }
-        
-        # Расчет общей стоимости по категориям
-        category_totals = {
-            category: sum(items.values()) for category, items in works.items()
-        }
-        
-        # Общая стоимость работ
-        total_works = sum(category_totals.values())
-        
-        return {
-            "works": works,
-            "category_totals": category_totals,
-            "total": total_works
-        }
-    except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"Ошибка в calculate_works_cost: {e}")
-        print(f"Детали ошибки: {error_details}")
-        # Возвращаем значения по умолчанию в случае ошибки
-        return {
-            "works": {
-                "Земляные работы": {"Выемка грунта": 0, "Обратная засыпка": 0, "Вывоз грунта": 0},
-                "Бетонные работы": {"Бетонирование подбетонки": 0, "Бетонирование чаши": 0, "Укладка щебня": 0},
-                "Опалубка и армирование": {"Монтаж опалубки": 0, "Армирование": 25000.00},
-                "Отделочные работы": {"Гидроизоляция": 0, "Финишная отделка": 0}
-            },
-            "category_totals": {
-                "Земляные работы": 0,
-                "Бетонные работы": 0,
-                "Опалубка и армирование": 25000.00,
-                "Отделочные работы": 0
-            },
-            "total": 25000.00
-        }
+    Returns:
+        dict: Словарь с расчетами стоимости работ
+    """
+    # Получаем параметры профиля
+    profile = get_profile(profile_id)
+    
+    # Получаем числовые значения из строк
+    earth_volume = float(basic_dims["Объем земляных работ"].split()[0])
+    concrete_volume = float(basic_dims["Объем бетона"].split()[0])
+    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+    
+    # Получаем цены из профиля
+    prices = profile["works_prices"]
+    
+    # Расчет стоимости работ
+    works_cost = {
+        "Земляные работы": earth_volume * prices["earthworks"],
+        "Бетонные работы": concrete_volume * prices["concrete_works"],
+        "Армирование": concrete_volume * 0.1 * prices["reinforcement"],  # Примерно 10% от объема бетона
+        "Гидроизоляция": finishing_area * prices["waterproofing"],
+        "Укладка плитки": finishing_area * prices["tile_laying"],
+        "Затирка швов": finishing_area * prices["grouting"],
+        "Монтаж оборудования": prices["equipment_installation"],
+        "Пусконаладочные работы": prices["commissioning"]
+    }
+    
+    # Общая стоимость работ
+    total_cost = sum(works_cost.values())
+    
+    # Форматируем вывод
+    return {
+        "works": {k: f"{v:,.0f} руб." for k, v in works_cost.items()},
+        "total_cost": f"{total_cost:,.0f} руб."
+    }
 
 def calculate_fixed_services():
     """Расчет фиксированных услуг"""
@@ -1105,365 +1040,442 @@ def index():
     return render_template('index.html')
 
 @app.route('/calculate', methods=['POST'])
-def calculate():
-    """Основная функция расчета"""
+def calculate_route():
+    """
+    Маршрут для расчета стоимости бассейна
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "length": float,      # Длина бассейна в мм
+        "width": float,       # Ширина бассейна в мм
+        "depth": float,       # Глубина бассейна в мм
+        "wall_thickness": float,  # Толщина стен в мм
+        "profile_id": str     # Идентификатор профиля КП (опционально)
+    }
+    
+    Returns:
+        JSON с результатами расчета или сообщением об ошибке
+    """
     try:
-        # Получаем данные из формы
+        # Получаем данные из запроса
         data = request.get_json()
         if not data:
-            print("Ошибка: Не получены данные из формы")
-            return jsonify({"error": "Не получены данные из формы"}), 400
+            return jsonify({"error": "Не получены данные"}), 400
             
-        try:
-            length = float(data.get('length', 8000))  # мм
-            width = float(data.get('width', 4000))    # мм
-            depth = float(data.get('depth', 1500))    # мм
-            wall_thickness = float(data.get('wall_thickness', 200))  # мм
-        except ValueError as e:
-            print(f"Ошибка при преобразовании значений: {e}")
-            return jsonify({"error": f"Некорректные числовые значения: {e}"}), 400
+        # Извлекаем параметры
+        length = float(data.get("length", 0))
+        width = float(data.get("width", 0))
+        depth = float(data.get("depth", 0))
+        wall_thickness = float(data.get("wall_thickness", 0))
+        profile_id = data.get("profile_id", "kp1")
+        
+        # Проверяем корректность параметров
+        if not all(isinstance(x, (int, float)) for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть числами"}), 400
             
-        pool_type = data.get('pool_type', 'liner')  # тип бассейна
+        if not all(x > 0 for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть положительными числами"}), 400
+            
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
         
-        # Проверка допустимых значений
-        if not (1000 <= length <= 20000):
-            print(f"Ошибка: Длина {length} вне допустимого диапазона")
-            return jsonify({"error": f"Длина должна быть от 1000 до 20000 мм, получено: {length}"}), 400
-        if not (1000 <= width <= 20000):
-            print(f"Ошибка: Ширина {width} вне допустимого диапазона")
-            return jsonify({"error": f"Ширина должна быть от 1000 до 20000 мм, получено: {width}"}), 400
-        if not (1000 <= depth <= 3000):
-            print(f"Ошибка: Глубина {depth} вне допустимого диапазона")
-            return jsonify({"error": f"Глубина должна быть от 1000 до 3000 мм, получено: {depth}"}), 400
-        if not (150 <= wall_thickness <= 300):
-            print(f"Ошибка: Толщина стенки {wall_thickness} вне допустимого диапазона")
-            return jsonify({"error": f"Толщина стенки должна быть от 150 до 300 мм, получено: {wall_thickness}"}), 400
+        # Выполняем расчет
+        result = calculate(length, width, depth, wall_thickness, profile_id)
         
-        print(f"Получены данные: длина={length}, ширина={width}, глубина={depth}, толщина={wall_thickness}, тип={pool_type}")
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result)
         
-        # Рассчитываем основные размеры
-        basic_dims = calculate_basic_dimensions(length, width, depth, wall_thickness)
-        if not basic_dims:
-            print("Ошибка: Не удалось рассчитать основные размеры")
-            return jsonify({"error": "Ошибка при расчете основных размеров"}), 500
-        
-        # Рассчитываем земляные работы
-        earthworks = calculate_earthworks(length, width, depth, wall_thickness)
-        if not earthworks:
-            print("Ошибка: Не удалось рассчитать земляные работы")
-            return jsonify({"error": "Ошибка при расчете земляных работ"}), 500
-        
-        # Рассчитываем бетонные работы
-        concrete = calculate_concrete_works(length, width, depth, wall_thickness)
-        if not concrete:
-            print("Ошибка: Не удалось рассчитать бетонные работы")
-            return jsonify({"error": "Ошибка при расчете бетонных работ"}), 500
-        
-        # Рассчитываем опалубку
-        formwork = calculate_formwork(length, width, depth, wall_thickness)
-        if not formwork:
-            print("Ошибка: Не удалось рассчитать опалубку")
-            return jsonify({"error": "Ошибка при расчете опалубки"}), 500
-        
-        # Рассчитываем отделочные работы
-        finishing = calculate_finishing_works(length, width, depth, pool_type)
-        if not finishing:
-            print("Ошибка: Не удалось рассчитать отделочные работы")
-            return jsonify({"error": "Ошибка при расчете отделочных работ"}), 500
-        
-        # Извлекаем площадь под отделку из basic_dims
-        try:
-            finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при извлечении площади под отделку: {e}")
-            finishing_area = finishing["area"]  # Используем значение из finishing, если не удалось извлечь из basic_dims
-        
-        # Рассчитываем стоимость материалов
-        try:
-            concrete_m200_volume = float(concrete["Бетон M200 (подбетонка)"].split()[0])
-            concrete_m300_volume = float(concrete["Бетон М300 (чаша)"].split()[0])
-            gravel_volume = float(concrete["Щебень"].split()[0])
-            rebar_weight = float(formwork["Вес арматуры"].split()[0])
-            plywood_sheets = int(formwork["Количество фанеры"].split()[0])
-        except (ValueError, KeyError, IndexError) as e:
-            print(f"Ошибка при извлечении значений для расчета стоимости материалов: {e}")
-            return jsonify({"error": f"Ошибка при извлечении значений: {e}"}), 500
-        
-        materials_cost = calculate_materials_cost(
-            concrete_m200_volume, 
-            concrete_m300_volume, 
-            gravel_volume, 
-            rebar_weight, 
-            plywood_sheets, 
-            pool_type, 
-            finishing_area
-        )
-        
-        if not materials_cost:
-            print("Ошибка: Не удалось рассчитать стоимость материалов")
-            return jsonify({"error": "Ошибка при расчете стоимости материалов"}), 500
-        
-        # Рассчитываем стоимость работ
-        works_cost = calculate_works_cost(
-            earthworks, 
-            concrete, 
-            formwork, 
-            finishing_area
-        )
-        
-        if not works_cost:
-            print("Ошибка: Не удалось рассчитать стоимость работ")
-            return jsonify({"error": "Ошибка при расчете стоимости работ"}), 500
-        
-        # Общая стоимость
-        total_cost = materials_cost["total"] + works_cost["total"] + finishing["total_cost"]
-        
-        # Применяем коэффициент для приближения к КП
-        # Базовые размеры для КП: 8000x4000x1500
-        base_volume = 8000 * 4000 * 1500 / 1000000000  # объем в м³
-        current_volume = length * width * depth / 1000000000  # объем в м³
-        
-        # Вместо простого соотношения объемов используем более сложную формулу
-        # Это позволит получить более точное соответствие КП
-        # Коэффициент влияния объема (меньше 1, чтобы уменьшить влияние изменения объема)
-        volume_influence = 0.7
-        volume_ratio = 1 + (current_volume / base_volume - 1) * volume_influence
-        
-        # Коэффициент для приближения к итоговой стоимости КП
-        kp_coefficient = 2.43  # Базовый коэффициент
-        
-        # Корректировка для глубины 1650 мм
-        if abs(depth - 1650) < 10:  # Если глубина примерно 1650 мм
-            kp_coefficient = 2.21  # Уменьшаем коэффициент для этой глубины
-        
-        # Применяем коэффициент к итоговой стоимости
-        adjusted_total_cost = total_cost * kp_coefficient * volume_ratio
-        
-        # Формируем ответ
-        response = {
-            "basic_dimensions": basic_dims,
-            "earthworks": earthworks,
-            "concrete_works": concrete,
-            "formwork": formwork,
-            "finishing": finishing,
-            "costs": {
-                "materials": materials_cost["materials"],
-                "equipment": materials_cost["equipment"],
-                "works": works_cost["works"],
-                "category_totals": works_cost["category_totals"],
-                "materials_total": materials_cost["total_materials"],
-                "equipment_total": materials_cost["total_equipment"],
-                "works_total": works_cost["total"],
-                "finishing_total": finishing["total_cost"],
-                "total": int(adjusted_total_cost)  # Округляем до целого числа
-            }
-        }
-        
-        return jsonify(response)
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"Ошибка в calculate: {e}")
-        print(f"Детали ошибки: {error_details}")
-        return jsonify({"error": str(e), "details": error_details}), 500
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/compare_estimate', methods=['POST'])
 def compare_estimate():
-    """Сравнение коммерческого предложения с расчетами калькулятора"""
+    """
+    Маршрут для сравнения расчета с предоставленной сметой
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "length": float,      # Длина бассейна в мм
+        "width": float,       # Ширина бассейна в мм
+        "depth": float,       # Глубина бассейна в мм
+        "wall_thickness": float,  # Толщина стен в мм
+        "profile_id": str,    # Идентификатор профиля КП
+        "estimate": {         # Данные сметы для сравнения
+            "water_surface": float,  # Площадь водного зеркала в м²
+            "perimeter": float,      # Периметр в м
+            "wall_area": float,      # Площадь стен в м²
+            "finishing_area": float, # Площадь под отделку в м²
+            "water_volume": float,   # Объем воды в м³
+            "total_cost": float      # Общая стоимость в руб.
+        }
+    }
+    
+    Returns:
+        JSON с результатами сравнения или сообщением об ошибке
+    """
     try:
-        data = request.json
+        # Получаем данные из запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Не получены данные"}), 400
+            
+        # Извлекаем параметры
+        length = float(data.get("length", 0))
+        width = float(data.get("width", 0))
+        depth = float(data.get("depth", 0))
+        wall_thickness = float(data.get("wall_thickness", 0))
+        profile_id = data.get("profile_id", "kp1")
+        estimate = data.get("estimate", {})
         
-        # Получаем основные параметры бассейна
-        length = data.get('length', 0)
-        width = data.get('width', 0)
-        depth = data.get('depth', 0)
-        wall_thickness = data.get('wall_thickness', 0)
+        # Проверяем корректность параметров
+        if not all(isinstance(x, (int, float)) for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть числами"}), 400
+            
+        if not all(x > 0 for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть положительными числами"}), 400
+            
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Проверяем наличие обязательных данных сметы
+        required_estimate_fields = ["water_surface", "perimeter", "wall_area", "finishing_area", "water_volume", "total_cost"]
+        missing_fields = [field for field in required_estimate_fields if field not in estimate]
+        if missing_fields:
+            return jsonify({"error": f"Отсутствуют обязательные данные сметы: {', '.join(missing_fields)}"}), 400
         
-        # Получаем данные из КП
-        estimate_data = data.get('estimate', {})
+        # Выполняем расчет
+        result = calculate(length, width, depth, wall_thickness, profile_id)
         
-        # Выполняем расчеты с помощью калькулятора
-        basic_dimensions = calculate_basic_dimensions(length, width, depth, wall_thickness)
-        
-        # Преобразуем строковые значения в числовые
-        calc_dimensions = {}
-        for key, value in basic_dimensions.items():
-            parts = value.split()
-            if len(parts) > 0:
-                calc_dimensions[key] = float(parts[0])
-        
-        # Сравниваем основные размеры
-        comparison = {
-            'dimensions': {
-                'water_surface': {
-                    'calc': calc_dimensions.get("Площадь водной поверхности", 0),
-                    'estimate': float(estimate_data.get('water_surface', 0)),
-                    'diff': round(calc_dimensions.get("Площадь водной поверхности", 0) - float(estimate_data.get('water_surface', 0)), 1)
-                },
-                'perimeter': {
-                    'calc': calc_dimensions.get("Периметр", 0),
-                    'estimate': float(estimate_data.get('perimeter', 0)),
-                    'diff': round(calc_dimensions.get("Периметр", 0) - float(estimate_data.get('perimeter', 0)), 1)
-                },
-                'wall_area': {
-                    'calc': calc_dimensions.get("Площадь стен", 0),
-                    'estimate': float(estimate_data.get('wall_area', 0)),
-                    'diff': round(calc_dimensions.get("Площадь стен", 0) - float(estimate_data.get('wall_area', 0)), 1)
-                },
-                'finishing_area': {
-                    'calc': calc_dimensions.get("Площадь под отделку", 0),
-                    'estimate': float(estimate_data.get('finishing_area', 0)),
-                    'diff': round(calc_dimensions.get("Площадь под отделку", 0) - float(estimate_data.get('finishing_area', 0)), 1)
-                },
-                'water_volume': {
-                    'calc': calc_dimensions.get("Объем воды", 0),
-                    'estimate': float(estimate_data.get('water_volume', 0)),
-                    'diff': round(calc_dimensions.get("Объем воды", 0) - float(estimate_data.get('water_volume', 0)), 1)
-                }
-            },
-            'costs': {
-                'materials': {
-                    'calc': 0,
-                    'estimate': float(estimate_data.get('materials_cost', 0)),
-                    'diff': -float(estimate_data.get('materials_cost', 0))
-                },
-                'work': {
-                    'calc': 0,
-                    'estimate': float(estimate_data.get('work_cost', 0)),
-                    'diff': -float(estimate_data.get('work_cost', 0))
-                },
-                'equipment': {
-                    'calc': 0,
-                    'estimate': float(estimate_data.get('equipment_cost', 0)),
-                    'diff': -float(estimate_data.get('equipment_cost', 0))
-                },
-                'total': {
-                    'calc': 0,
-                    'estimate': float(estimate_data.get('total_cost', 0)),
-                    'diff': -float(estimate_data.get('total_cost', 0))
-                }
-            }
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        # Извлекаем числовые значения из результата
+        calculated = {
+            "water_surface": float(result["basic_dimensions"]["Площадь водного зеркала"].split()[0]),
+            "perimeter": float(result["basic_dimensions"]["Периметр"].split()[0]),
+            "wall_area": float(result["basic_dimensions"]["Площадь стен"].split()[0]),
+            "finishing_area": float(result["basic_dimensions"]["Площадь под отделку"].split()[0]),
+            "water_volume": float(result["basic_dimensions"]["Объем воды"].split()[0]),
+            "total_cost": float(result["total_cost"].replace(" руб.", "").replace(",", ""))
         }
         
+        # Рассчитываем отклонения
+        deviations = {}
+        for field in required_estimate_fields:
+            if calculated[field] != 0:
+                deviation = ((estimate[field] - calculated[field]) / calculated[field]) * 100
+                deviations[field] = {
+                    "calculated": calculated[field],
+                    "estimated": estimate[field],
+                    "deviation": f"{deviation:.1f}%"
+                }
+        
         return jsonify({
-            'success': True,
-            'comparison': comparison
+            "calculated": calculated,
+            "estimated": estimate,
+            "deviations": deviations,
+            "profile": PROFILES[profile_id]["name"]
         })
+        
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 400
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/generate_kp', methods=['POST'])
 def generate_kp():
-    """Генерация коммерческого предложения в формате ООО "ДОН БАСС" """
-    try:
-        data = request.json
-        
-        # Получаем основные параметры бассейна
-        length = data.get('length', 0)
-        width = data.get('width', 0)
-        depth = data.get('depth', 0)
-        wall_thickness = data.get('wall_thickness', 0)
-        pool_type = data.get('pool_type', 'liner')
-        
-        # Данные заказчика
-        customer_data = data.get('customer', {})
-        
-        # Текущая дата для КП
-        from datetime import datetime
-        today = datetime.now()
-        
-        # Базовые расчеты
-        basic_dimensions = calculate_basic_dimensions(length, width, depth, wall_thickness)
-        
-        # Получаем данные для КП в формате ООО "ДОН БАСС"
-        kp_items = calculate_kp_items(length, width, depth, pool_type)
-        
-        # Преобразуем строковые значения в числовые
-        dimensions = {}
-        for key, value in basic_dimensions.items():
-            parts = value.split()
-            if len(parts) > 0:
-                dimensions[key] = float(parts[0])
-        
-        # Подсчет общей суммы
-        total_amount = kp_items["equipment_total"] + kp_items["materials_total"] + kp_items["works_total"]
-        
-        # Преобразование суммы в текстовый формат
-        equipment_text = num2text(kp_items["equipment_total"])
-        materials_text = num2text(kp_items["materials_total"])
-        works_text = num2text(kp_items["works_total"])
-        total_text = num2text(total_amount)
-        
-        # Формируем КП в формате ДОН БАСС
-        kp_data = {
-            "company": {
-                "name": "Компания ООО \"ДОН БАСС\"",
-                "email": "ooo.donbass61@mail.ru",
-                "website": "https://ooodonbass.ru/",
-                "phone": "+7(938) 158-11-11"
-            },
-            "date": {
-                "day": today.strftime("%d"),
-                "month": today.strftime("%m"),
-                "year": today.strftime("%Y")
-            },
-            "customer": {
-                "name": customer_data.get('name', 'Владимир'),
-                "phone": customer_data.get('phone', '8(928) 118-67-27'),
-                "address": customer_data.get('address', 'Таганрог'),
-                "location": customer_data.get('location', 'Улица')
-            },
-            "pool": {
-                "length": length,
-                "width": width,
-                "depth": depth,
-                "type": "Скиммерный",
-                "finish": "Лайнер" if pool_type == "liner" else "Плитка" if pool_type == "tile" else "Мозаика",
-                "shape": "Прямоугольный",
-                "category": "Частный",
-                "water_surface": dimensions.get("Площадь водной поверхности", 0),
-                "perimeter": dimensions.get("Периметр", 0),
-                "wall_area": dimensions.get("Площадь стен", 0),
-                "finishing_area": dimensions.get("Площадь под отделку", 0),
-                "water_volume": dimensions.get("Объем воды", 0) * 1000  # конвертируем в литры
-            },
-            "equipment": {
-                "items": kp_items["equipment_items"],
-                "total": kp_items["equipment_total"],
-                "total_text": equipment_text,
-                "count": len(kp_items["equipment_items"])
-            },
-            "materials": {
-                "items": kp_items["materials_items"],
-                "total": kp_items["materials_total"],
-                "total_text": materials_text,
-                "count": len(kp_items["materials_items"])
-            },
-            "works": {
-                "items": kp_items["works_items"],
-                "total": kp_items["works_total"],
-                "total_text": works_text,
-                "count": len(kp_items["works_items"])
-            },
-            "total": total_amount,
-            "total_text": total_text
+    """
+    Маршрут для генерации коммерческого предложения
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "length": float,      # Длина бассейна в мм
+        "width": float,       # Ширина бассейна в мм
+        "depth": float,       # Глубина бассейна в мм
+        "wall_thickness": float,  # Толщина стен в мм
+        "profile_id": str,    # Идентификатор профиля КП
+        "customer": {         # Данные заказчика
+            "name": str,
+            "address": str,
+            "phone": str,
+            "email": str
         }
+    }
+    
+    Returns:
+        JSON с результатами расчета или сообщением об ошибке
+    """
+    try:
+        # Получаем данные из запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Не получены данные"}), 400
+            
+        # Извлекаем параметры
+        length = float(data.get("length", 0))
+        width = float(data.get("width", 0))
+        depth = float(data.get("depth", 0))
+        wall_thickness = float(data.get("wall_thickness", 0))
+        profile_id = data.get("profile_id", "kp1")
+        customer = data.get("customer", {})
+        
+        # Проверяем корректность параметров
+        if not all(isinstance(x, (int, float)) for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть числами"}), 400
+            
+        if not all(x > 0 for x in [length, width, depth, wall_thickness]):
+            return jsonify({"error": "Все параметры должны быть положительными числами"}), 400
+            
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Проверяем наличие обязательных данных заказчика
+        required_customer_fields = ["name", "address", "phone"]
+        missing_fields = [field for field in required_customer_fields if field not in customer]
+        if missing_fields:
+            return jsonify({"error": f"Отсутствуют обязательные данные заказчика: {', '.join(missing_fields)}"}), 400
+        
+        # Выполняем расчет
+        result = calculate(length, width, depth, wall_thickness, profile_id)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        # Добавляем данные заказчика
+        result["customer"] = customer
+        
+        # Добавляем дату генерации КП
+        result["generation_date"] = datetime.now().strftime("%d.%m.%Y")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/get_profiles', methods=['GET'])
+def get_profiles():
+    """
+    Маршрут для получения списка доступных профилей КП
+    
+    Returns:
+        JSON со списком профилей КП
+    """
+    try:
+        profiles = get_profiles_list()
+        return jsonify({
+            "profiles": profiles
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/get_profile/<profile_id>', methods=['GET'])
+def get_profile_route(profile_id):
+    """
+    Маршрут для получения параметров конкретного профиля КП
+    
+    Args:
+        profile_id (str): Идентификатор профиля КП
+        
+    Returns:
+        JSON с параметрами профиля КП или сообщением об ошибке
+    """
+    try:
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Получаем параметры профиля
+        profile = get_profile(profile_id)
         
         return jsonify({
-            "success": True,
-            "kp_data": kp_data
+            "profile": profile
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/get_dimensions_correction', methods=['POST'])
+def get_dimensions_correction():
+    """
+    Маршрут для получения коэффициентов корректировки размеров
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "length": float,      # Длина бассейна в мм
+        "width": float,       # Ширина бассейна в мм
+        "depth": float,       # Глубина бассейна в мм
+        "profile_id": str     # Идентификатор профиля КП
+    }
+    
+    Returns:
+        JSON с коэффициентами корректировки или сообщением об ошибке
+    """
+    try:
+        # Получаем данные из запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Не получены данные"}), 400
+            
+        # Извлекаем параметры
+        length = float(data.get("length", 0))
+        width = float(data.get("width", 0))
+        depth = float(data.get("depth", 0))
+        profile_id = data.get("profile_id", "kp1")
+        
+        # Проверяем корректность параметров
+        if not all(isinstance(x, (int, float)) for x in [length, width, depth]):
+            return jsonify({"error": "Все параметры должны быть числами"}), 400
+            
+        if not all(x > 0 for x in [length, width, depth]):
+            return jsonify({"error": "Все параметры должны быть положительными числами"}), 400
+            
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Получаем коэффициенты корректировки
+        correction_factors = get_dimensions_correction_factor(profile_id, {
+            "length": length,
+            "width": width,
+            "depth": depth
+        })
+        
+        return jsonify({
+            "correction_factors": correction_factors,
+            "profile": PROFILES[profile_id]["name"]
         })
         
     except Exception as e:
-        error_details = traceback.format_exc()
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/get_prices', methods=['POST'])
+def get_prices():
+    """
+    Маршрут для получения цен из профиля КП
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "profile_id": str     # Идентификатор профиля КП
+    }
+    
+    Returns:
+        JSON с ценами материалов и работ или сообщением об ошибке
+    """
+    try:
+        # Получаем данные из запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Не получены данные"}), 400
+            
+        # Извлекаем параметры
+        profile_id = data.get("profile_id", "kp1")
+        
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Получаем профиль
+        profile = get_profile(profile_id)
+        
         return jsonify({
-            "success": False,
-            "error": str(e),
-            "details": error_details
-        }), 400
+            "materials_prices": profile["materials_prices"],
+            "works_prices": profile["works_prices"],
+            "profile": profile["name"]
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/get_costs', methods=['POST'])
+def get_costs():
+    """
+    Маршрут для получения стоимостей из профиля КП
+    
+    Ожидает POST-запрос с JSON-данными:
+    {
+        "profile_id": str     # Идентификатор профиля КП
+    }
+    
+    Returns:
+        JSON со стоимостями материалов, работ и оборудования или сообщением об ошибке
+    """
+    try:
+        # Получаем данные из запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Не получены данные"}), 400
+            
+        # Извлекаем параметры
+        profile_id = data.get("profile_id", "kp1")
+        
+        # Проверяем корректность профиля
+        if profile_id not in PROFILES:
+            return jsonify({"error": f"Неизвестный профиль КП: {profile_id}"}), 400
+            
+        # Получаем профиль
+        profile = get_profile(profile_id)
+        
+        return jsonify({
+            "costs": profile["costs"],
+            "profile": profile["name"]
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+def calculate(length, width, depth, wall_thickness, profile_id="kp1"):
+    """
+    Расчет стоимости бассейна с учетом профиля КП
+    
+    Args:
+        length (float): Длина бассейна в мм
+        width (float): Ширина бассейна в мм
+        depth (float): Глубина бассейна в мм
+        wall_thickness (float): Толщина стен в мм
+        profile_id (str): Идентификатор профиля КП
+        
+    Returns:
+        dict: Словарь с результатами расчета
+    """
+    try:
+        # Получаем параметры профиля
+        profile = get_profile(profile_id)
+        
+        # Расчет основных размеров
+        basic_dims = calculate_basic_dimensions(length, width, depth, wall_thickness, profile_id)
+        
+        # Расчет стоимости материалов
+        materials_cost = calculate_materials_cost(basic_dims, wall_thickness, profile_id)
+        
+        # Расчет стоимости работ
+        works_cost = calculate_works_cost(basic_dims, wall_thickness, profile_id)
+        
+        # Расчет стоимости отделочных работ
+        finishing_cost = calculate_finishing_cost(basic_dims, profile_id)
+        
+        # Общая стоимость
+        total_cost = (
+            float(materials_cost["total_cost"].replace(" руб.", "").replace(",", "")) +
+            float(works_cost["total_cost"].replace(" руб.", "").replace(",", "")) +
+            float(finishing_cost["total_cost"].replace(" руб.", "").replace(",", ""))
+        )
+        
+        # Форматируем результат
+        result = {
+            "basic_dimensions": basic_dims,
+            "materials_cost": materials_cost,
+            "works_cost": works_cost,
+            "finishing_cost": finishing_cost,
+            "total_cost": f"{total_cost:,.0f} руб.",
+            "profile": profile["name"]
+        }
+        
+        return result
+        
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3333))
