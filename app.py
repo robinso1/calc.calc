@@ -1,14 +1,30 @@
 from flask import Flask, request, jsonify, render_template
 import math
 import os
+import sys
 from dotenv import load_dotenv
 from flask_cors import CORS
 from datetime import datetime
 from kp_profiles import PROFILES, get_profile, get_profiles_list, get_dimensions_correction_factor
 
 app = Flask(__name__)
-CORS(app)
+# Разрешаем CORS для всех доменов
+CORS(app, resources={r"/*": {"origins": "*"}})
 load_dotenv()
+
+# Настройка логирования для отладки
+@app.before_request
+def log_request_info():
+    app.logger.debug('Headers: %s', request.headers)
+    app.logger.debug('Body: %s', request.get_data())
+    
+@app.after_request
+def after_request(response):
+    # Добавляем заголовки CORS для всех запросов
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 def calculate_basic_dimensions(length, width, depth, wall_thickness, profile_id="kp1"):
     """
@@ -1456,12 +1472,39 @@ def calculate(length, width, depth, wall_thickness, profile_id="kp1"):
         # Расчет стоимости отделочных работ
         finishing_cost = calculate_finishing_cost(basic_dims, profile_id)
         
+        # Получаем числовые значения стоимости
+        materials_total = 0
+        if isinstance(materials_cost["total_cost"], (int, float)):
+            materials_total = materials_cost["total_cost"]
+        else:
+            # Пытаемся извлечь числовое значение из строки
+            try:
+                materials_total = float(str(materials_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
+            except:
+                materials_total = 0
+                
+        works_total = 0
+        if isinstance(works_cost["total_cost"], (int, float)):
+            works_total = works_cost["total_cost"]
+        else:
+            # Пытаемся извлечь числовое значение из строки
+            try:
+                works_total = float(str(works_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
+            except:
+                works_total = 0
+                
+        finishing_total = 0
+        if isinstance(finishing_cost["total_cost"], (int, float)):
+            finishing_total = finishing_cost["total_cost"]
+        else:
+            # Пытаемся извлечь числовое значение из строки
+            try:
+                finishing_total = float(str(finishing_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
+            except:
+                finishing_total = 0
+        
         # Общая стоимость
-        total_cost = (
-            float(materials_cost["total_cost"].replace(" руб.", "").replace(",", "")) +
-            float(works_cost["total_cost"].replace(" руб.", "").replace(",", "")) +
-            float(finishing_cost["total_cost"].replace(" руб.", "").replace(",", ""))
-        )
+        total_cost = materials_total + works_total + finishing_total
         
         # Форматируем результат
         result = {
