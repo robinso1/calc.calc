@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask_cors import CORS
 from datetime import datetime
+from kp_profiles import PROFILES, get_profile, get_profiles_list, get_dimensions_correction_factor
 
 app = Flask(__name__)
 CORS(app)
