@@ -76,16 +76,30 @@ def calculate_basic_dimensions(length, width, depth, wall_thickness, profile_id=
     # Рассчитываем объем земляных работ (примерно в 2 раза больше объема бассейна)
     earth_volume = water_volume * 2
     
-    # Форматируем вывод
-    return {
+    # Создаем словарь с числовыми значениями для использования в других функциях
+    raw_dims = {
+        "water_surface": water_surface,
+        "perimeter": perimeter,
+        "wall_area": wall_area,
+        "finishing_area": finishing_area,
+        "water_volume": water_volume,
+        "concrete_volume": concrete_volume,
+        "earth_volume": earth_volume
+    }
+    
+    # Форматируем вывод для отображения
+    formatted_dims = {
         "Площадь водного зеркала": f"{water_surface:.1f} м²",
         "Периметр": f"{perimeter:.1f} м",
         "Площадь стен": f"{wall_area:.1f} м²",
         "Площадь под отделку": f"{finishing_area:.1f} м²",
         "Объем воды": f"{water_volume:.1f} м³",
         "Объем бетона": f"{concrete_volume:.1f} м³",
-        "Объем земляных работ": f"{earth_volume:.1f} м³"
+        "Объем земляных работ": f"{earth_volume:.1f} м³",
+        "_raw": raw_dims  # Сохраняем сырые данные для других функций
     }
+    
+    return formatted_dims
 
 def calculate_earthworks(length, width, depth, wall_thickness):
     """Расчет земляных работ"""
@@ -208,8 +222,17 @@ def calculate_finishing_cost(basic_dims, profile_id="kp1"):
     # Получаем параметры профиля
     profile = get_profile(profile_id)
     
-    # Получаем числовые значения из строк
-    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+    # Получаем числовые значения
+    raw = basic_dims.get("_raw", {})
+    finishing_area = raw.get("finishing_area", 0)
+    
+    # Если нет _raw данных, пытаемся получить из строк
+    if not raw:
+        try:
+            finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+        except (KeyError, ValueError, IndexError) as e:
+            print(f"Ошибка при извлечении значений: {e}")
+            return {"error": "Неверный формат размеров"}
     
     # Получаем цены из профиля
     prices = profile["materials_prices"]
@@ -236,7 +259,7 @@ def calculate_finishing_cost(basic_dims, profile_id="kp1"):
     return {
         "materials": {k: f"{v:,.0f} руб." for k, v in materials_cost.items()},
         "works": {k: f"{v:,.0f} руб." for k, v in works_cost.items()},
-        "total_cost": f"{total_cost:,.0f} руб."
+        "total_cost": total_cost  # Возвращаем числовое значение для использования в других функциях
     }
 
 def calculate_materials_cost(basic_dims, wall_thickness, profile_id="kp1"):
@@ -254,11 +277,23 @@ def calculate_materials_cost(basic_dims, wall_thickness, profile_id="kp1"):
     # Получаем параметры профиля
     profile = get_profile(profile_id)
     
-    # Получаем числовые значения из строк
-    water_surface = float(basic_dims["Площадь водного зеркала"].split()[0])
-    wall_area = float(basic_dims["Площадь стен"].split()[0])
-    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
-    concrete_volume = float(basic_dims["Объем бетона"].split()[0])
+    # Получаем числовые значения
+    raw = basic_dims.get("_raw", {})
+    water_surface = raw.get("water_surface", 0)
+    wall_area = raw.get("wall_area", 0)
+    finishing_area = raw.get("finishing_area", 0)
+    concrete_volume = raw.get("concrete_volume", 0)
+    
+    # Если нет _raw данных, пытаемся получить из строк
+    if not raw:
+        try:
+            water_surface = float(basic_dims["Площадь водного зеркала"].split()[0])
+            wall_area = float(basic_dims["Площадь стен"].split()[0])
+            finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+            concrete_volume = float(basic_dims["Объем бетона"].split()[0])
+        except (KeyError, ValueError, IndexError) as e:
+            print(f"Ошибка при извлечении значений: {e}")
+            return {"error": "Неверный формат размеров"}
     
     # Получаем цены из профиля
     prices = profile["materials_prices"]
@@ -280,7 +315,7 @@ def calculate_materials_cost(basic_dims, wall_thickness, profile_id="kp1"):
     # Форматируем вывод
     return {
         "materials": {k: f"{v:,.0f} руб." for k, v in materials_cost.items()},
-        "total_cost": f"{total_cost:,.0f} руб."
+        "total_cost": total_cost  # Возвращаем числовое значение для использования в других функциях
     }
 
 def calculate_works_cost(basic_dims, wall_thickness, profile_id="kp1"):
@@ -298,10 +333,21 @@ def calculate_works_cost(basic_dims, wall_thickness, profile_id="kp1"):
     # Получаем параметры профиля
     profile = get_profile(profile_id)
     
-    # Получаем числовые значения из строк
-    earth_volume = float(basic_dims["Объем земляных работ"].split()[0])
-    concrete_volume = float(basic_dims["Объем бетона"].split()[0])
-    finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+    # Получаем числовые значения
+    raw = basic_dims.get("_raw", {})
+    earth_volume = raw.get("earth_volume", 0)
+    concrete_volume = raw.get("concrete_volume", 0)
+    finishing_area = raw.get("finishing_area", 0)
+    
+    # Если нет _raw данных, пытаемся получить из строк
+    if not raw:
+        try:
+            earth_volume = float(basic_dims["Объем земляных работ"].split()[0])
+            concrete_volume = float(basic_dims["Объем бетона"].split()[0])
+            finishing_area = float(basic_dims["Площадь под отделку"].split()[0])
+        except (KeyError, ValueError, IndexError) as e:
+            print(f"Ошибка при извлечении значений: {e}")
+            return {"error": "Неверный формат размеров"}
     
     # Получаем цены из профиля
     prices = profile["works_prices"]
@@ -324,7 +370,7 @@ def calculate_works_cost(basic_dims, wall_thickness, profile_id="kp1"):
     # Форматируем вывод
     return {
         "works": {k: f"{v:,.0f} руб." for k, v in works_cost.items()},
-        "total_cost": f"{total_cost:,.0f} руб."
+        "total_cost": total_cost  # Возвращаем числовое значение для использования в других функциях
     }
 
 def calculate_fixed_services():
@@ -1457,6 +1503,13 @@ def calculate(length, width, depth, wall_thickness, profile_id="kp1"):
         dict: Словарь с результатами расчета
     """
     try:
+        # Проверка входных данных
+        if not all(isinstance(x, (int, float)) for x in [length, width, depth, wall_thickness]):
+            return {"error": "Все размеры должны быть числами"}
+        
+        if not all(x > 0 for x in [length, width, depth, wall_thickness]):
+            return {"error": "Все размеры должны быть положительными числами"}
+        
         # Получаем параметры профиля
         profile = get_profile(profile_id)
         
@@ -1466,45 +1519,36 @@ def calculate(length, width, depth, wall_thickness, profile_id="kp1"):
         # Расчет стоимости материалов
         materials_cost = calculate_materials_cost(basic_dims, wall_thickness, profile_id)
         
+        # Проверяем на ошибки
+        if "error" in materials_cost:
+            return {"error": materials_cost["error"]}
+        
         # Расчет стоимости работ
         works_cost = calculate_works_cost(basic_dims, wall_thickness, profile_id)
+        
+        # Проверяем на ошибки
+        if "error" in works_cost:
+            return {"error": works_cost["error"]}
         
         # Расчет стоимости отделочных работ
         finishing_cost = calculate_finishing_cost(basic_dims, profile_id)
         
-        # Получаем числовые значения стоимости
-        materials_total = 0
-        if isinstance(materials_cost["total_cost"], (int, float)):
-            materials_total = materials_cost["total_cost"]
-        else:
-            # Пытаемся извлечь числовое значение из строки
-            try:
-                materials_total = float(str(materials_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
-            except:
-                materials_total = 0
-                
-        works_total = 0
-        if isinstance(works_cost["total_cost"], (int, float)):
-            works_total = works_cost["total_cost"]
-        else:
-            # Пытаемся извлечь числовое значение из строки
-            try:
-                works_total = float(str(works_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
-            except:
-                works_total = 0
-                
-        finishing_total = 0
-        if isinstance(finishing_cost["total_cost"], (int, float)):
-            finishing_total = finishing_cost["total_cost"]
-        else:
-            # Пытаемся извлечь числовое значение из строки
-            try:
-                finishing_total = float(str(finishing_cost["total_cost"]).replace(" руб.", "").replace(",", ""))
-            except:
-                finishing_total = 0
+        # Проверяем на ошибки
+        if "error" in finishing_cost:
+            return {"error": finishing_cost["error"]}
         
+        # Получаем числовые значения стоимости
+        materials_total = materials_cost["total_cost"]
+        works_total = works_cost["total_cost"]
+        finishing_total = finishing_cost["total_cost"]
+                
         # Общая стоимость
         total_cost = materials_total + works_total + finishing_total
+        
+        # Добавляем форматированные строки для отображения в UI
+        materials_cost["total_cost_str"] = f"{materials_total:,.0f} руб."
+        works_cost["total_cost_str"] = f"{works_total:,.0f} руб."
+        finishing_cost["total_cost_str"] = f"{finishing_total:,.0f} руб."
         
         # Форматируем результат
         result = {
@@ -1519,6 +1563,9 @@ def calculate(length, width, depth, wall_thickness, profile_id="kp1"):
         return result
         
     except Exception as e:
+        import traceback
+        print(f"Ошибка при расчете: {e}")
+        print(traceback.format_exc())
         return {"error": str(e)}
 
 if __name__ == '__main__':

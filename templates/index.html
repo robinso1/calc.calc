@@ -699,7 +699,7 @@
                             .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
                             .join('')}
                     </div>
-                    <p><strong>Итого по материалам:</strong> ${materialsCost.total_cost}</p>
+                    <p><strong>Итого по материалам:</strong> ${materialsCost.total_cost_str || materialsCost.total_cost}</p>
                 `;
                 
                 // Стоимость работ
@@ -710,26 +710,28 @@
                             .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
                             .join('')}
                     </div>
-                    <p><strong>Итого по работам:</strong> ${worksCost.total_cost}</p>
+                    <p><strong>Итого по работам:</strong> ${worksCost.total_cost_str || worksCost.total_cost}</p>
                 `;
                 
                 // Стоимость отделочных работ
-                const finishingCost = result.finishing_cost;
-                document.getElementById('finishing').innerHTML = `
-                    <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof finishingCost.area === 'number' ? finishingCost.area.toFixed(1) : finishingCost.area} м²</span></div>
-                    <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof finishingCost.perimeter === 'number' ? finishingCost.perimeter.toFixed(1) : finishingCost.perimeter} м/п</span></div>
-                    <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(finishingCost.material_cost)}</span></div>
-                    <div class="cost-item"><span>Стоимость копингового камня:</span> <span>${formatCurrency(finishingCost.coping_stone.total)}</span></div>
-                    <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(finishingCost.work_cost)}</span></div>
-                    <div class="total-cost"><span>Итого по отделочным работам:</span> <span>${formatCurrency(finishingCost.total_cost)}</span></div>
-                `;
+                if (result.finishing_cost) {
+                    const finishingCost = result.finishing_cost;
+                    document.getElementById('finishing').innerHTML = `
+                        <div class="mb-3">
+                            ${Object.entries(finishingCost.materials || {})
+                                .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                                .join('')}
+                            ${Object.entries(finishingCost.works || {})
+                                .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                                .join('')}
+                        </div>
+                        <p><strong>Итого по отделке:</strong> ${finishingCost.total_cost_str || finishingCost.total_cost}</p>
+                    `;
+                }
                 
                 // Общая стоимость
                 document.getElementById('totalCost').innerHTML = `
-                    <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(materialsCost.total_cost)}</span></div>
-                    <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(worksCost.total_cost)}</span></div>
-                    <div class="cost-item"><span>Стоимость отделочных работ:</span> <span>${formatCurrency(finishingCost.total_cost)}</span></div>
-                    <div class="total-cost"><span>ИТОГО:</span> <span>${formatCurrency(result.total_cost)}</span></div>
+                    <p><strong>ИТОГО:</strong> ${result.total_cost}</p>
                 `;
                 
                 // Профиль КП
