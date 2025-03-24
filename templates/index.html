@@ -682,6 +682,12 @@
                     return;
                 }
                 
+                // Функция форматирования чисел для отображения
+                function formatCurrency(value) {
+                    if (typeof value === 'undefined' || value === null) return "0";
+                    return new Intl.NumberFormat('ru-RU').format(Math.round(value));
+                }
+                
                 // Отображаем результаты
                 document.getElementById('results').style.display = 'block';
                 
@@ -735,44 +741,89 @@
                 `;
                 
                 // Профиль КП
-                document.getElementById('kp-pool-type').textContent = result.profile;
-                document.getElementById('kp-pool-finish').textContent = result.pool.finish;
-                document.getElementById('kp-pool-shape').textContent = result.pool.shape;
-                document.getElementById('kp-pool-category').textContent = result.pool.category;
+                if (document.getElementById('kp-pool-type')) {
+                    document.getElementById('kp-pool-type').textContent = result.profile;
+                }
+                if (result.pool && document.getElementById('kp-pool-finish')) {
+                    document.getElementById('kp-pool-finish').textContent = result.pool.finish || '';
+                }
+                if (result.pool && document.getElementById('kp-pool-shape')) {
+                    document.getElementById('kp-pool-shape').textContent = result.pool.shape || '';
+                }
+                if (result.pool && document.getElementById('kp-pool-category')) {
+                    document.getElementById('kp-pool-category').textContent = result.pool.category || '';
+                }
                 
                 // Обновляем размеры в правой колонке
                 const table = document.querySelector('#kp-container table');
-                table.rows[1].cells[2].textContent = `Длина: ${result.pool.length}`;
-                table.rows[2].cells[2].textContent = `Ширина: ${result.pool.width}`;
-                table.rows[3].cells[2].textContent = `Глубина,1: ${result.pool.depth}`;
-                table.rows[4].cells[2].textContent = `Глубина,2: ${result.pool.depth}`;
-                table.rows[5].cells[2].textContent = `Глубина (ср): ${result.pool.depth}`;
-                table.rows[6].cells[2].textContent = `V (объем): ${formatCurrency(result.pool.water_volume)} л`;
-                table.rows[7].cells[2].textContent = `Р (периметр): ${formatCurrency(result.pool.perimeter)} м/п`;
-                table.rows[8].cells[2].textContent = `S (зеркало): ${formatCurrency(result.pool.water_surface)} м²`;
-                table.rows[9].cells[2].textContent = `S (стен): ${formatCurrency(result.pool.wall_area)} м²`;
-                table.rows[10].cells[2].textContent = `S (под отделку): ${formatCurrency(result.pool.finishing_area)} м²`;
+                if (table && result.pool) {
+                    try {
+                        if (table.rows[1] && table.rows[1].cells[2]) {
+                            table.rows[1].cells[2].textContent = `Длина: ${result.pool.length}`;
+                        }
+                        if (table.rows[2] && table.rows[2].cells[2]) {
+                            table.rows[2].cells[2].textContent = `Ширина: ${result.pool.width}`;
+                        }
+                        if (table.rows[3] && table.rows[3].cells[2]) {
+                            table.rows[3].cells[2].textContent = `Глубина,1: ${result.pool.depth}`;
+                        }
+                        if (table.rows[4] && table.rows[4].cells[2]) {
+                            table.rows[4].cells[2].textContent = `Глубина,2: ${result.pool.depth}`;
+                        }
+                        if (table.rows[5] && table.rows[5].cells[2]) {
+                            table.rows[5].cells[2].textContent = `Глубина (ср): ${result.pool.depth}`;
+                        }
+                        if (table.rows[6] && table.rows[6].cells[2]) {
+                            table.rows[6].cells[2].textContent = `V (объем): ${formatCurrency(result.pool.water_volume)} л`;
+                        }
+                        if (table.rows[7] && table.rows[7].cells[2]) {
+                            table.rows[7].cells[2].textContent = `Р (периметр): ${formatCurrency(result.pool.perimeter)} м/п`;
+                        }
+                        if (table.rows[8] && table.rows[8].cells[2]) {
+                            table.rows[8].cells[2].textContent = `S (зеркало): ${formatCurrency(result.pool.water_surface)} м²`;
+                        }
+                        if (table.rows[9] && table.rows[9].cells[2]) {
+                            table.rows[9].cells[2].textContent = `S (стен): ${formatCurrency(result.pool.wall_area)} м²`;
+                        }
+                        if (table.rows[10] && table.rows[10].cells[2]) {
+                            table.rows[10].cells[2].textContent = `S (под отделку): ${formatCurrency(result.pool.finishing_area)} м²`;
+                        }
+                    } catch (err) {
+                        console.error('Ошибка при обновлении размеров в таблице:', err);
+                    }
+                }
                 
                 // Заполняем таблицу оборудования
-                let equipmentHtml = '';
-                result.equipment.items.forEach((item, index) => {
-                    equipmentHtml += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.name}</td>
-                            <td>${item.unit}</td>
-                            <td>${item.qty}</td>
-                            <td>${formatCurrency(item.price)}</td>
-                            <td>${formatCurrency(item.qty * item.price)}</td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('kp-equipment-items').innerHTML = equipmentHtml;
-                document.getElementById('kp-equipment-total').textContent = formatCurrency(result.equipment.total);
+                if (result.equipment && result.equipment.items && document.getElementById('kp-equipment-items')) {
+                    let equipmentHtml = '';
+                    result.equipment.items.forEach((item, index) => {
+                        equipmentHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.name}</td>
+                                <td>${item.unit}</td>
+                                <td>${item.qty}</td>
+                                <td>${formatCurrency(item.price)}</td>
+                                <td>${formatCurrency(item.qty * item.price)}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('kp-equipment-items').innerHTML = equipmentHtml;
+                }
+
+                if (result.equipment && document.getElementById('kp-equipment-total')) {
+                    document.getElementById('kp-equipment-total').textContent = formatCurrency(result.equipment.total);
+                }
                 
                 // Формируем текст под таблицей оборудования
-                document.getElementById('kp-equipment-text').textContent = `Всего наименований ${result.equipment.count}, на сумму ${formatCurrency(result.equipment.total)} рублей`;
-                document.getElementById('kp-equipment-text').textContent += `\n${result.equipment.total_text}`;
+                if (result.equipment && document.getElementById('kp-equipment-text')) {
+                    if (document.getElementById('kp-equipment-text')) {
+                        document.getElementById('kp-equipment-text').textContent = `Всего наименований ${result.equipment.count}, на сумму ${formatCurrency(result.equipment.total)} рублей`;
+                        if (result.equipment.total_text) {
+                            document.getElementById('kp-equipment-text').textContent += `\n${result.equipment.total_text}`;
+                        }
+                    }
+                }
                 
                 // Заполняем таблицу материалов
                 let materialsHtml = '';
@@ -792,8 +843,12 @@
                 document.getElementById('kp-materials-total').textContent = formatCurrency(result.materials.total);
                 
                 // Формируем текст под таблицей материалов
-                document.getElementById('kp-materials-text').textContent = `Всего наименований ${result.materials.count}, на сумму ${formatCurrency(result.materials.total)} рублей`;
-                document.getElementById('kp-materials-text').textContent += `\n${result.materials.total_text}`;
+                if (result.materials && document.getElementById('kp-materials-text')) {
+                    document.getElementById('kp-materials-text').textContent = `Всего наименований ${result.materials.count}, на сумму ${formatCurrency(result.materials.total)} рублей`;
+                    if (result.materials.total_text) {
+                        document.getElementById('kp-materials-text').textContent += `\n${result.materials.total_text}`;
+                    }
+                }
                 
                 // Заполняем таблицу работ
                 let worksHtml = '';
@@ -813,12 +868,20 @@
                 document.getElementById('kp-works-total').textContent = formatCurrency(result.works.total);
                 
                 // Формируем текст под таблицей работ
-                document.getElementById('kp-works-text').textContent = `Всего наименований ${result.works.count}, на сумму ${formatCurrency(result.works.total)} рублей`;
-                document.getElementById('kp-works-text').textContent += `\n${result.works.total_text}`;
+                if (result.works && document.getElementById('kp-works-text')) {
+                    document.getElementById('kp-works-text').textContent = `Всего наименований ${result.works.count}, на сумму ${formatCurrency(result.works.total)} рублей`;
+                    if (result.works.total_text) {
+                        document.getElementById('kp-works-text').textContent += `\n${result.works.total_text}`;
+                    }
+                }
                 
                 // Итоговая сумма
-                document.getElementById('kp-grand-total').textContent = `${formatCurrency(result.total_cost)} рублей`;
-                document.getElementById('kp-grand-total-text').textContent = result.total_text;
+                if (document.getElementById('kp-grand-total')) {
+                    document.getElementById('kp-grand-total').textContent = `${formatCurrency(result.total_cost)} рублей`;
+                }
+                if (result.total_text && document.getElementById('kp-grand-total-text')) {
+                    document.getElementById('kp-grand-total-text').textContent = result.total_text;
+                }
                 
             } catch (error) {
                 alert('Произошла ошибка при расчете: ' + error.message);
