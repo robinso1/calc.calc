@@ -180,19 +180,19 @@
                             <div class="mb-3">
                                 <label for="length" class="form-label">Длина (мм)</label>
                                 <input type="number" class="form-control" id="length" required min="0" step="100">
-                            </div>
+                        </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <label for="width" class="form-label">Ширина (мм)</label>
                                 <input type="number" class="form-control" id="width" required min="0" step="100">
-                            </div>
                         </div>
+                    </div>
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <label for="depth" class="form-label">Глубина (мм)</label>
                                 <input type="number" class="form-control" id="depth" required min="0" step="50">
-                            </div>
+                        </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
@@ -209,7 +209,7 @@
                                     <option value="kp1">КП №1 (8000x4000x1500)</option>
                                     <option value="kp2">КП №2 (8000x3000x1500)</option>
                                     <option value="kp3">КП №3 (8000x3000x1500) - Упрощенный</option>
-                                </select>
+                            </select>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -220,9 +220,9 @@
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
-        
+                        </div>
+                    </div>
+                    
         <!-- Форма для ввода данных заказчика перед генерацией КП -->
         <div id="customer-data-form" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -248,8 +248,8 @@
                             <div class="mb-3">
                                 <label for="customer-location" class="form-label">Место размещения</label>
                                 <input type="text" class="form-control" id="customer-location" value="Улица">
-                            </div>
-                        </form>
+                    </div>
+                </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -372,7 +372,7 @@
             </div>
         </div>
 
-        <!-- Секция для сравнения с КП -->
+        <!-- Код для сравнения КП -->
         <div class="card mt-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Сравнение с коммерческим предложением</h5>
@@ -425,13 +425,20 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <button class="btn btn-primary w-100" id="compare-btn">Сравнить с расчетами</button>
+                        <!-- Индикатор загрузки -->
+                        <div id="loading-message" class="alert alert-info mt-3 d-none text-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <span>Выполняется сравнение...</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Результат сравнения -->
-        <div class="card mt-4 hidden" id="comparison-result">
+        <div class="card mt-4 d-none" id="comparison-result">
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0">Результаты сравнения</h5>
             </div>
@@ -658,12 +665,25 @@
         document.getElementById('poolForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const depth = parseFloat(document.getElementById('depth').value);
+            const wall_thickness = parseFloat(document.getElementById('wall_thickness').value);
+            
+            // Проверяем наличие элемента profile в форме
+            let profile_id = "kp1"; // Значение по умолчанию
+            const profileElement = document.getElementById('profile');
+            if (profileElement) {
+                profile_id = profileElement.value;
+            }
+            
+            // Создаем объект с данными запроса
             const data = {
-                length: parseFloat(document.getElementById('length').value),
-                width: parseFloat(document.getElementById('width').value),
-                depth: parseFloat(document.getElementById('depth').value),
-                wall_thickness: parseFloat(document.getElementById('wall_thickness').value),
-                profile_id: document.getElementById('profile').value
+                length: length,
+                width: width,
+                depth: depth,
+                wall_thickness: wall_thickness,
+                profile_id: profile_id
             };
             
             try {
@@ -675,6 +695,10 @@
                     body: JSON.stringify(data)
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 
                 if (result.error) {
@@ -682,206 +706,7 @@
                     return;
                 }
                 
-                // Функция форматирования чисел для отображения
-                function formatCurrency(value) {
-                    if (typeof value === 'undefined' || value === null) return "0";
-                    return new Intl.NumberFormat('ru-RU').format(Math.round(value));
-                }
-                
-                // Отображаем результаты
-                document.getElementById('results').style.display = 'block';
-                
-                // Основные размеры
-                const basicDims = result.basic_dimensions;
-                document.getElementById('basicDimensions').innerHTML = Object.entries(basicDims)
-                    .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                    .join('');
-                
-                // Стоимость материалов
-                const materialsCost = result.materials_cost;
-                document.getElementById('materialsCost').innerHTML = `
-                    <div class="mb-3">
-                        ${Object.entries(materialsCost.materials)
-                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                            .join('')}
-                    </div>
-                    <p><strong>Итого по материалам:</strong> ${materialsCost.total_cost_str || materialsCost.total_cost}</p>
-                `;
-                
-                // Стоимость работ
-                const worksCost = result.works_cost;
-                document.getElementById('worksCost').innerHTML = `
-                    <div class="mb-3">
-                        ${Object.entries(worksCost.works)
-                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                            .join('')}
-                    </div>
-                    <p><strong>Итого по работам:</strong> ${worksCost.total_cost_str || worksCost.total_cost}</p>
-                `;
-                
-                // Стоимость отделочных работ
-                if (result.finishing_cost) {
-                    const finishingCost = result.finishing_cost;
-                    document.getElementById('finishing').innerHTML = `
-                        <div class="mb-3">
-                            ${Object.entries(finishingCost.materials || {})
-                                .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                                .join('')}
-                            ${Object.entries(finishingCost.works || {})
-                                .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                                .join('')}
-                        </div>
-                        <p><strong>Итого по отделке:</strong> ${finishingCost.total_cost_str || finishingCost.total_cost}</p>
-                    `;
-                }
-                
-                // Общая стоимость
-                document.getElementById('totalCost').innerHTML = `
-                    <p><strong>ИТОГО:</strong> ${result.total_cost}</p>
-                `;
-                
-                // Профиль КП
-                if (document.getElementById('kp-pool-type')) {
-                    document.getElementById('kp-pool-type').textContent = result.profile;
-                }
-                if (result.pool && document.getElementById('kp-pool-finish')) {
-                    document.getElementById('kp-pool-finish').textContent = result.pool.finish || '';
-                }
-                if (result.pool && document.getElementById('kp-pool-shape')) {
-                    document.getElementById('kp-pool-shape').textContent = result.pool.shape || '';
-                }
-                if (result.pool && document.getElementById('kp-pool-category')) {
-                    document.getElementById('kp-pool-category').textContent = result.pool.category || '';
-                }
-                
-                // Обновляем размеры в правой колонке
-                const table = document.querySelector('#kp-container table');
-                if (table && result.pool) {
-                    try {
-                        if (table.rows[1] && table.rows[1].cells[2]) {
-                            table.rows[1].cells[2].textContent = `Длина: ${result.pool.length}`;
-                        }
-                        if (table.rows[2] && table.rows[2].cells[2]) {
-                            table.rows[2].cells[2].textContent = `Ширина: ${result.pool.width}`;
-                        }
-                        if (table.rows[3] && table.rows[3].cells[2]) {
-                            table.rows[3].cells[2].textContent = `Глубина,1: ${result.pool.depth}`;
-                        }
-                        if (table.rows[4] && table.rows[4].cells[2]) {
-                            table.rows[4].cells[2].textContent = `Глубина,2: ${result.pool.depth}`;
-                        }
-                        if (table.rows[5] && table.rows[5].cells[2]) {
-                            table.rows[5].cells[2].textContent = `Глубина (ср): ${result.pool.depth}`;
-                        }
-                        if (table.rows[6] && table.rows[6].cells[2]) {
-                            table.rows[6].cells[2].textContent = `V (объем): ${formatCurrency(result.pool.water_volume)} л`;
-                        }
-                        if (table.rows[7] && table.rows[7].cells[2]) {
-                            table.rows[7].cells[2].textContent = `Р (периметр): ${formatCurrency(result.pool.perimeter)} м/п`;
-                        }
-                        if (table.rows[8] && table.rows[8].cells[2]) {
-                            table.rows[8].cells[2].textContent = `S (зеркало): ${formatCurrency(result.pool.water_surface)} м²`;
-                        }
-                        if (table.rows[9] && table.rows[9].cells[2]) {
-                            table.rows[9].cells[2].textContent = `S (стен): ${formatCurrency(result.pool.wall_area)} м²`;
-                        }
-                        if (table.rows[10] && table.rows[10].cells[2]) {
-                            table.rows[10].cells[2].textContent = `S (под отделку): ${formatCurrency(result.pool.finishing_area)} м²`;
-                        }
-                    } catch (err) {
-                        console.error('Ошибка при обновлении размеров в таблице:', err);
-                    }
-                }
-                
-                // Заполняем таблицу оборудования
-                if (result.equipment && result.equipment.items && document.getElementById('kp-equipment-items')) {
-                    let equipmentHtml = '';
-                    result.equipment.items.forEach((item, index) => {
-                        equipmentHtml += `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${item.name}</td>
-                                <td>${item.unit}</td>
-                                <td>${item.qty}</td>
-                                <td>${formatCurrency(item.price)}</td>
-                                <td>${formatCurrency(item.qty * item.price)}</td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById('kp-equipment-items').innerHTML = equipmentHtml;
-                }
-
-                if (result.equipment && document.getElementById('kp-equipment-total')) {
-                    document.getElementById('kp-equipment-total').textContent = formatCurrency(result.equipment.total);
-                }
-                
-                // Формируем текст под таблицей оборудования
-                if (result.equipment && document.getElementById('kp-equipment-text')) {
-                    if (document.getElementById('kp-equipment-text')) {
-                        document.getElementById('kp-equipment-text').textContent = `Всего наименований ${result.equipment.count}, на сумму ${formatCurrency(result.equipment.total)} рублей`;
-                        if (result.equipment.total_text) {
-                            document.getElementById('kp-equipment-text').textContent += `\n${result.equipment.total_text}`;
-                        }
-                    }
-                }
-                
-                // Заполняем таблицу материалов
-                let materialsHtml = '';
-                result.materials.items.forEach((item, index) => {
-                    materialsHtml += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.name}</td>
-                            <td>${item.unit}</td>
-                            <td>${item.qty}</td>
-                            <td>${formatCurrency(item.price)}</td>
-                            <td>${formatCurrency(item.qty * item.price)}</td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('kp-materials-items').innerHTML = materialsHtml;
-                document.getElementById('kp-materials-total').textContent = formatCurrency(result.materials.total);
-                
-                // Формируем текст под таблицей материалов
-                if (result.materials && document.getElementById('kp-materials-text')) {
-                    document.getElementById('kp-materials-text').textContent = `Всего наименований ${result.materials.count}, на сумму ${formatCurrency(result.materials.total)} рублей`;
-                    if (result.materials.total_text) {
-                        document.getElementById('kp-materials-text').textContent += `\n${result.materials.total_text}`;
-                    }
-                }
-                
-                // Заполняем таблицу работ
-                let worksHtml = '';
-                result.works.items.forEach((item, index) => {
-                    worksHtml += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.name}</td>
-                            <td>${item.unit}</td>
-                            <td>${item.qty}</td>
-                            <td>${formatCurrency(item.price)}</td>
-                            <td>${formatCurrency(item.qty * item.price)}</td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('kp-works-items').innerHTML = worksHtml;
-                document.getElementById('kp-works-total').textContent = formatCurrency(result.works.total);
-                
-                // Формируем текст под таблицей работ
-                if (result.works && document.getElementById('kp-works-text')) {
-                    document.getElementById('kp-works-text').textContent = `Всего наименований ${result.works.count}, на сумму ${formatCurrency(result.works.total)} рублей`;
-                    if (result.works.total_text) {
-                        document.getElementById('kp-works-text').textContent += `\n${result.works.total_text}`;
-                    }
-                }
-                
-                // Итоговая сумма
-                if (document.getElementById('kp-grand-total')) {
-                    document.getElementById('kp-grand-total').textContent = `${formatCurrency(result.total_cost)} рублей`;
-                }
-                if (result.total_text && document.getElementById('kp-grand-total-text')) {
-                    document.getElementById('kp-grand-total-text').textContent = result.total_text;
-                }
+                displayResults(result);
                 
             } catch (error) {
                 alert('Произошла ошибка при расчете: ' + error.message);
@@ -891,100 +716,122 @@
         $(document).ready(function() {
             // Код для сравнения с КП
             $("#compare-btn").click(function() {
-                // Получаем параметры бассейна из формы
-                const length = parseFloat($("#length").val());
-                const width = parseFloat($("#width").val());
-                const depth = parseFloat($("#depth").val());
-                const wallThickness = parseFloat($("#wall_thickness").val());
-                const poolType = $("#profile").val();
-                
-                // Получаем данные из КП
-                const estimateData = {
-                    water_surface: $("#kp-water-surface").val(),
-                    perimeter: $("#kp-perimeter").val(),
-                    wall_area: $("#kp-wall-area").val(),
-                    finishing_area: $("#kp-finishing-area").val(),
-                    water_volume: $("#kp-water-volume").val(),
-                    materials_cost: $("#kp-materials-cost").val(),
-                    work_cost: $("#kp-work-cost").val(),
-                    equipment_cost: $("#kp-equipment-cost").val(),
-                    total_cost: $("#kp-total-cost").val()
-                };
-                
-                // Отправляем запрос на сервер
-                $.ajax({
-                    url: "/compare_estimate",
-                    type: "POST",
-                    data: JSON.stringify({
-                        length: length,
-                        width: width,
-                        depth: depth,
-                        wall_thickness: wallThickness,
-                        pool_type: poolType,
-                        estimate: estimateData
-                    }),
-                    contentType: "application/json",
-                    dataType: "json",
-                    success: function(response) {
-                        if (response.success) {
+                try {
+                    // Показываем индикатор загрузки или сообщение
+                    $("#loading-message").removeClass("d-none").text("Выполняется сравнение...");
+                    
+                    // Получаем параметры бассейна из формы
+                    const length = parseFloat($("#length").val() || 0);
+                    const width = parseFloat($("#width").val() || 0);
+                    const depth = parseFloat($("#depth").val() || 0);
+                    const wallThickness = parseFloat($("#wall_thickness").val() || 0);
+                    
+                    // Получаем тип бассейна и определяем соответствующий profile_id
+                    const poolType = $("#pool_type").val() || "liner";
+                    let profile_id = "kp1"; // Значение по умолчанию
+                    
+                    // Конвертируем pool_type в profile_id
+                    if (poolType === "liner") {
+                        profile_id = "kp1";
+                    } else if (poolType === "tile") {
+                        profile_id = "kp2";
+                    } else if (poolType === "mosaic") {
+                        profile_id = "kp3";
+                    }
+                    
+                    // Получаем данные из КП и преобразуем их в числа
+                    const estimateData = {
+                        water_surface: parseFloat($("#kp-water-surface").val() || 0),
+                        perimeter: parseFloat($("#kp-perimeter").val() || 0),
+                        wall_area: parseFloat($("#kp-wall-area").val() || 0),
+                        finishing_area: parseFloat($("#kp-finishing-area").val() || 0),
+                        water_volume: parseFloat($("#kp-water-volume").val() || 0),
+                        materials_cost: parseFloat($("#kp-materials-cost").val() || 0),
+                        work_cost: parseFloat($("#kp-work-cost").val() || 0),
+                        equipment_cost: parseFloat($("#kp-equipment-cost").val() || 0),
+                        total_cost: parseFloat($("#kp-total-cost").val() || 0)
+                    };
+                    
+                    // Проверяем наличие обязательных параметров
+                    if (!length || !width || !depth || !wallThickness) {
+                        throw new Error("Пожалуйста, укажите все размеры бассейна");
+                    }
+                    
+                    // Отправляем запрос на сервер
+                    fetch("/compare_estimate", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            length: length,
+                            width: width,
+                            depth: depth,
+                            wall_thickness: wallThickness,
+                            pool_type: poolType,
+                            profile_id: profile_id,
+                            estimate: estimateData
+                        })
+                    })
+                    .then(response => {
+                        // Скрываем индикатор загрузки
+                        $("#loading-message").addClass("d-none");
+                        
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || 'Произошла ошибка при сравнении');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Проверяем полученные данные
+                        console.log("Получены данные сравнения:", data);
+                        
+                        if (data.success && data.comparison) {
                             // Показываем результат сравнения
-                            $("#comparison-result").removeClass("hidden");
+                            $("#comparison-result").removeClass("d-none");
                             
                             // Заполняем таблицу сравнения размеров
-                            const dimensions = response.comparison.dimensions;
+                            const dimensions = data.comparison.dimensions;
                             let dimensionsHtml = "";
                             
-                            dimensionsHtml += createComparisonRow("Площадь водной поверхности (м²)", 
-                                dimensions.water_surface.calc, 
-                                dimensions.water_surface.estimate, 
-                                dimensions.water_surface.diff);
+                            // Функция для создания строки сравнения с проверкой данных
+                            function createSafeComparisonRow(label, dimension) {
+                                if (!dimension) return "";
                                 
-                            dimensionsHtml += createComparisonRow("Периметр (м/п)", 
-                                dimensions.perimeter.calc, 
-                                dimensions.perimeter.estimate, 
-                                dimensions.perimeter.diff);
+                                const calc = dimension.calc !== undefined ? formatNumber(dimension.calc) : "0";
+                                const estimate = dimension.estimate !== undefined ? formatNumber(dimension.estimate) : "0";
+                                const diff = dimension.diff !== undefined ? formatNumber(dimension.diff) : "0";
                                 
-                            dimensionsHtml += createComparisonRow("Площадь стен (м²)", 
-                                dimensions.wall_area.calc, 
-                                dimensions.wall_area.estimate, 
-                                dimensions.wall_area.diff);
-                                
-                            dimensionsHtml += createComparisonRow("Площадь под отделку (м²)", 
-                                dimensions.finishing_area.calc, 
-                                dimensions.finishing_area.estimate, 
-                                dimensions.finishing_area.diff);
-                                
-                            dimensionsHtml += createComparisonRow("Объем воды (м³)", 
-                                dimensions.water_volume.calc, 
-                                dimensions.water_volume.estimate, 
-                                dimensions.water_volume.diff);
-                                
+                                return createComparisonRow(label, calc, estimate, diff);
+                            }
+                            
+                            if (dimensions) {
+                                dimensionsHtml += createSafeComparisonRow("Площадь водной поверхности (м²)", dimensions.water_surface);
+                                dimensionsHtml += createSafeComparisonRow("Периметр (м/п)", dimensions.perimeter);
+                                dimensionsHtml += createSafeComparisonRow("Площадь стен (м²)", dimensions.wall_area);
+                                dimensionsHtml += createSafeComparisonRow("Площадь под отделку (м²)", dimensions.finishing_area);
+                                dimensionsHtml += createSafeComparisonRow("Объем воды (м³)", dimensions.water_volume);
+                            } else {
+                                dimensionsHtml = "<tr><td colspan='4' class='text-center'>Нет данных для сравнения размеров</td></tr>";
+                            }
+                            
                             $("#dimensions-comparison").html(dimensionsHtml);
                             
                             // Заполняем таблицу сравнения стоимости
-                            const costs = response.comparison.costs;
+                            const costs = data.comparison.costs;
                             let costsHtml = "";
                             
-                            costsHtml += createComparisonRow("Материалы (руб)", 
-                                formatNumber(costs.materials.calc), 
-                                formatNumber(costs.materials.estimate), 
-                                formatNumber(costs.materials.diff));
-                                
-                            costsHtml += createComparisonRow("Работы (руб)", 
-                                formatNumber(costs.work.calc), 
-                                formatNumber(costs.work.estimate), 
-                                formatNumber(costs.work.diff));
-                                
-                            costsHtml += createComparisonRow("Оборудование (руб)", 
-                                formatNumber(costs.equipment.calc), 
-                                formatNumber(costs.equipment.estimate), 
-                                formatNumber(costs.equipment.diff));
-                                
-                            costsHtml += createComparisonRow("Итого (руб)", 
-                                formatNumber(costs.total.calc), 
-                                formatNumber(costs.total.estimate), 
-                                formatNumber(costs.total.diff), true);
-                                
+                            if (costs) {
+                                costsHtml += createSafeComparisonRow("Материалы (руб)", costs.materials);
+                                costsHtml += createSafeComparisonRow("Работы (руб)", costs.work);
+                                costsHtml += createSafeComparisonRow("Оборудование (руб)", costs.equipment);
+                                costsHtml += createSafeComparisonRow("Итого (руб)", costs.total, true);
+                            } else {
+                                costsHtml = "<tr><td colspan='4' class='text-center'>Нет данных для сравнения стоимости</td></tr>";
+                            }
+                            
                             $("#costs-comparison").html(costsHtml);
                             
                             // Прокручиваем страницу к результатам
@@ -992,19 +839,29 @@
                                 scrollTop: $("#comparison-result").offset().top - 20
                             }, 500);
                         } else {
-                            alert("Ошибка при сравнении: " + response.error);
+                            alert("Ошибка при сравнении: " + (data.error || "Неизвестная ошибка"));
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        alert("Ошибка при отправке запроса: " + error);
-                    }
-                });
+                    })
+                    .catch(error => {
+                        // Скрываем индикатор загрузки
+                        $("#loading-message").addClass("d-none");
+                        
+                        console.error("Ошибка:", error);
+                        alert("Ошибка при отправке запроса: " + error.message);
+                    });
+                } catch (error) {
+                    // Скрываем индикатор загрузки
+                    $("#loading-message").addClass("d-none");
+                    
+                    alert("Ошибка: " + error.message);
+                }
             });
             
             // Функция для создания строки сравнения
             function createComparisonRow(label, calc, estimate, diff, isTotal = false) {
-                const diffClass = diff > 0 ? "text-danger" : (diff < 0 ? "text-success" : "");
-                const diffPrefix = diff > 0 ? "+" : "";
+                const diffNum = parseFloat(diff.replace(/\s/g, "").replace(",", "."));
+                const diffClass = diffNum > 0 ? "text-danger" : (diffNum < 0 ? "text-success" : "");
+                const diffPrefix = diffNum > 0 ? "+" : "";
                 
                 let rowClass = isTotal ? "fw-bold" : "";
                 
@@ -1016,8 +873,11 @@
                 </tr>`;
             }
             
-            // Форматирование чисел
+            // Функция для форматирования чисел
             function formatNumber(num) {
+                if (num === undefined || num === null) {
+                    return "0";
+                }
                 return parseFloat(num).toLocaleString('ru-RU');
             }
         });
@@ -1076,7 +936,7 @@
                     displayKP(data.kp_data);
                     document.getElementById('kp-container').classList.remove('hidden');
                     document.getElementById('results').classList.add('hidden');
-                    document.getElementById('errorMessage').classList.add('hidden');
+                document.getElementById('errorMessage').classList.add('hidden');
                     
                     // Прокручиваем страницу к КП
                     window.scrollTo({
@@ -1097,7 +957,7 @@
         function displayKP(kpData) {
             // Форматирование чисел
             const formatCurrency = (value) => {
-                return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(value);
+                return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
             };
             
             // Заполняем данные компании
@@ -1212,6 +1072,284 @@
             document.getElementById('kp-container').classList.add('hidden');
             document.getElementById('results').classList.remove('hidden');
         });
+
+        function displayResults(data) {
+            // Проверяем, что данные корректны
+            if (!data) {
+                console.error("Получены пустые данные от сервера");
+                alert("Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.");
+                return;
+            }
+            
+            // Показываем результаты
+            const resultsElement = document.getElementById('results');
+            if (resultsElement) {
+                resultsElement.classList.remove('hidden');
+            } else {
+                console.error("Не найден элемент с ID 'results'");
+            }
+            
+            // Форматирование чисел
+            const formatCurrency = (value) => {
+                if (value === undefined || value === null) return "0 ₽";
+                return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
+            };
+            
+            // Функция безопасного доступа к свойствам объекта
+            const safeGet = (obj, path, defaultValue = '') => {
+                if (!obj) return defaultValue;
+                const keys = path.split('.');
+                let result = obj;
+                for (const key of keys) {
+                    result = result?.[key];
+                    if (result === undefined || result === null) {
+                        return defaultValue;
+                    }
+                }
+                return result;
+            };
+            
+            // Вспомогательная функция для безопасной установки innerHTML
+            const safeSetInnerHTML = (elementId, html) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.innerHTML = html;
+                } else {
+                    console.warn(`Элемент с ID '${elementId}' не найден`);
+                }
+            };
+            
+            // Основные размеры
+            const basicDimensions = data.basic_dimensions || {};
+            const basicDimensionsHtml = Object.entries(basicDimensions)
+                .filter(([key]) => key !== '_raw') // Исключаем _raw из отображения
+                .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                .join('');
+            safeSetInnerHTML('basicDimensions', basicDimensionsHtml);
+            
+            // Земляные работы
+            if (data.earthworks) {
+                const earthworksHtml = Object.entries(data.earthworks)
+                    .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                    .join('');
+                safeSetInnerHTML('earthworks', earthworksHtml);
+            }
+            
+            // Бетонные работы
+            if (data.concrete_works) {
+                const concreteHtml = Object.entries(data.concrete_works)
+                    .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                    .join('');
+                safeSetInnerHTML('concrete', concreteHtml);
+            }
+            
+            // Опалубка и армирование
+            if (data.formwork) {
+                const formworkHtml = Object.entries(data.formwork)
+                    .map(([key, value]) => `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`)
+                    .join('');
+                safeSetInnerHTML('formwork', formworkHtml);
+            }
+            
+            // Отделочные работы
+            let finishingHtml = '';
+            const finishingCost = data.finishing_cost || {};
+            const poolData = safeGet(data, 'pool_data', {});
+            const profileId = safeGet(poolData, 'profile.id', 'kp1');
+            
+            if (Object.keys(finishingCost).length > 0) {
+                if (profileId === 'kp1') {
+                    // Вариант для лайнера (KP1)
+                    const area = safeGet(finishingCost, 'area', 0);
+                    const perimeter = safeGet(finishingCost, 'perimeter', 0);
+                    const liningCost = safeGet(finishingCost, 'lining.cost_str', '0 руб.');
+                    const copingstoneCost = safeGet(finishingCost, 'coping_stone.cost_str', '0 руб.');
+                    const totalCost = safeGet(finishingCost, 'total_cost_str', '0 руб.');
+                    
+                    finishingHtml = `
+                        <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof area === 'number' ? area.toFixed(1) : area} м²</span></div>
+                        <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof perimeter === 'number' ? perimeter.toFixed(1) : perimeter} м/п</span></div>
+                        <div class="cost-item"><span>Стоимость лайнера:</span> <span>${liningCost}</span></div>
+                        <div class="cost-item"><span>Стоимость копингового камня:</span> <span>${copingstoneCost}</span></div>
+                        <div class="total-cost"><span>Итого по отделке:</span> <span>${totalCost}</span></div>
+                    `;
+                } else if (profileId === 'kp2' && finishingCost.materials) {
+                    // Вариант для плитки (KP2)
+                    let materialsHtml = '';
+                    for (const [key, value] of Object.entries(finishingCost.materials || {})) {
+                        materialsHtml += `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`;
+                    }
+                    
+                    let worksHtml = '';
+                    for (const [key, value] of Object.entries(finishingCost.works || {})) {
+                        worksHtml += `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`;
+                    }
+                    
+                    const area = safeGet(finishingCost, 'area', 0);
+                    const perimeter = safeGet(finishingCost, 'perimeter', 0);
+                    const totalCost = safeGet(finishingCost, 'total_cost_str', '0 руб.');
+                    
+                    finishingHtml = `
+                        <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof area === 'number' ? area.toFixed(1) : area} м²</span></div>
+                        <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof perimeter === 'number' ? perimeter.toFixed(1) : perimeter} м/п</span></div>
+                        ${materialsHtml}
+                        ${worksHtml}
+                        <div class="total-cost"><span>Итого по отделке:</span> <span>${totalCost}</span></div>
+                    `;
+                } else {
+                    // Упрощенный вариант для других профилей
+                    const area = safeGet(finishingCost, 'area', 0);
+                    const perimeter = safeGet(finishingCost, 'perimeter', 0);
+                    const materialCost = safeGet(finishingCost, 'material_cost_str', '0 руб.');
+                    const workCost = safeGet(finishingCost, 'work_cost_str', '0 руб.');
+                    const totalCost = safeGet(finishingCost, 'total_cost_str', '0 руб.');
+                    
+                    finishingHtml = `
+                        <div class="cost-item"><span>Площадь отделки:</span> <span>${typeof area === 'number' ? area.toFixed(1) : area} м²</span></div>
+                        <div class="cost-item"><span>Периметр для копингового камня:</span> <span>${typeof perimeter === 'number' ? perimeter.toFixed(1) : perimeter} м/п</span></div>
+                        <div class="cost-item"><span>Стоимость материалов:</span> <span>${materialCost}</span></div>
+                        <div class="cost-item"><span>Стоимость работ:</span> <span>${workCost}</span></div>
+                        <div class="total-cost"><span>Итого по отделке:</span> <span>${totalCost}</span></div>
+                    `;
+                }
+            }
+            safeSetInnerHTML('finishing', finishingHtml);
+            
+            // Стоимость материалов
+            let materialsCostHtml = '';
+            const materialsCost = data.materials_cost || {};
+            if (materialsCost.materials) {
+                for (const [key, value] of Object.entries(materialsCost.materials)) {
+                    materialsCostHtml += `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`;
+                }
+                materialsCostHtml += `<div class="total-cost"><span>Итого по материалам:</span> <span>${materialsCost.total_cost_str || ''}</span></div>`;
+            }
+            safeSetInnerHTML('materialsCost', materialsCostHtml);
+            
+            // Стоимость работ
+            let worksCostHtml = '';
+            const worksCost = data.works_cost || {};
+            if (worksCost.works) {
+                for (const [key, value] of Object.entries(worksCost.works)) {
+                    worksCostHtml += `<div class="cost-item"><span>${key}:</span> <span>${value}</span></div>`;
+                }
+                worksCostHtml += `<div class="total-cost"><span>Итого по работам:</span> <span>${worksCost.total_cost_str || ''}</span></div>`;
+            }
+            safeSetInnerHTML('worksCost', worksCostHtml);
+            
+            // Заполнение таблиц детализированного КП
+            const kpItems = data.kp_items || {};
+            
+            // Проверяем наличие элементов для таблиц
+            const equipmentItemsTable = document.getElementById('equipmentItemsTable');
+            const materialsItemsTable = document.getElementById('materialsItemsTable');
+            const worksItemsTable = document.getElementById('worksItemsTable');
+            
+            // Оборудование
+            if (kpItems.equipment_items && equipmentItemsTable) {
+                let equipmentHtml = '';
+                kpItems.equipment_items.forEach((item, index) => {
+                    const itemTotal = (item.qty || 0) * (item.price || 0);
+                    equipmentHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.unit || ''}</td>
+                            <td>${item.qty || 0}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(itemTotal)}</td>
+                        </tr>
+                    `;
+                });
+                equipmentItemsTable.innerHTML = equipmentHtml;
+                
+                const equipmentItemsTotal = document.getElementById('equipmentItemsTotal');
+                if (equipmentItemsTotal) {
+                    equipmentItemsTotal.textContent = formatCurrency(kpItems.equipment_total);
+                }
+            }
+            
+            // Материалы
+            if (kpItems.materials_items && materialsItemsTable) {
+                let materialsHtml = '';
+                kpItems.materials_items.forEach((item, index) => {
+                    const itemTotal = (item.qty || 0) * (item.price || 0);
+                    materialsHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.unit || ''}</td>
+                            <td>${item.qty || 0}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(itemTotal)}</td>
+                        </tr>
+                    `;
+                });
+                materialsItemsTable.innerHTML = materialsHtml;
+                
+                const materialsItemsTotal = document.getElementById('materialsItemsTotal');
+                if (materialsItemsTotal) {
+                    materialsItemsTotal.textContent = formatCurrency(kpItems.materials_total);
+                }
+            }
+            
+            // Работы
+            if (kpItems.works_items && worksItemsTable) {
+                let worksHtml = '';
+                kpItems.works_items.forEach((item, index) => {
+                    const itemTotal = (item.qty || 0) * (item.price || 0);
+                    worksHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.unit || ''}</td>
+                            <td>${item.qty || 0}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(itemTotal)}</td>
+                        </tr>
+                    `;
+                });
+                worksItemsTable.innerHTML = worksHtml;
+                
+                const worksItemsTotal = document.getElementById('worksItemsTotal');
+                if (worksItemsTotal) {
+                    worksItemsTotal.textContent = formatCurrency(kpItems.works_total);
+                }
+            }
+            
+            // Заполнение итоговой таблицы
+            const costs = data.costs || {};
+
+            // Безопасно устанавливаем значения элементов, проверяя их существование
+            const safeSetTextContent = (elementId, value) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                } else {
+                    console.warn(`Элемент с ID '${elementId}' не найден`);
+                }
+            };
+            
+            safeSetTextContent('totalEquipmentCost', formatCurrency(safeGet(kpItems, 'equipment_total', 0)));
+            safeSetTextContent('totalMaterialsCost', formatCurrency(safeGet(kpItems, 'materials_total', 0)));
+            safeSetTextContent('totalWorksCost', formatCurrency(safeGet(kpItems, 'works_total', 0)));
+            safeSetTextContent('grandTotalCost', formatCurrency(safeGet(costs, 'total', 0)));
+            
+            // Стоимость материалов и оборудования (для обратной совместимости)
+            const equipmentCostHtml = `<div class="total-cost"><span>Итого по оборудованию:</span> <span>${formatCurrency(safeGet(kpItems, 'equipment_total', 0))}</span></div>`;
+            safeSetInnerHTML('equipmentCost', equipmentCostHtml);
+            
+            // Итоговая стоимость (сводная)
+            const totalCostHtml = `
+                <div class="cost-item"><span>Стоимость материалов:</span> <span>${formatCurrency(safeGet(costs, 'materials_total', 0))}</span></div>
+                <div class="cost-item"><span>Стоимость работ:</span> <span>${formatCurrency(safeGet(costs, 'works_total', 0))}</span></div>
+                <div class="cost-item"><span>Стоимость оборудования:</span> <span>${formatCurrency(safeGet(costs, 'equipment_total', 0))}</span></div>
+                <div class="total-cost"><span>ИТОГО:</span> <span>${formatCurrency(safeGet(costs, 'total', 0))}</span></div>
+            `;
+            safeSetInnerHTML('totalCost', totalCostHtml);
+            
+            console.log("Расчет успешно завершен и отображен");
+        }
     </script>
 </body>
 </html> 
